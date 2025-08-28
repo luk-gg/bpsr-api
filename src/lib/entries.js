@@ -1,3 +1,3 @@
-import { entries_brief as WEAPONS } from "./weapons"
+import { entries_brief as ITEMS } from "./items"
 
-export default [WEAPONS].flat()
+export default [ITEMS].flat()

@@ -23,15 +23,6 @@ const itemsBaseMap = itemsBase.reduce((acc, curr) => {
     return acc
 }, {})
 
-// Recursively iterates recipes to replace material IDs with item objects
-const entries = itemsBase.map((item) => {
-    const recipes = item.recipes.map(recipe => walkRecipeTree(recipe))
-    return {
-        ...item,
-        recipes
-    }
-})
-
 function walkRecipeTree(recipe) {
     if (recipe.NeedMaterial.length < 1) return recipe
 
@@ -51,6 +42,15 @@ function walkRecipeTree(recipe) {
         NeedMaterial: newMaterials
     }
 }
+
+// Recursively iterates recipes to replace material IDs with item objects
+const entries = itemsBase.map((item) => {
+    const recipes = item.recipes.map(recipe => walkRecipeTree(recipe))
+    return {
+        ...item,
+        recipes
+    }
+})
 
 export const entries_brief = getBriefArr(entries)
 
