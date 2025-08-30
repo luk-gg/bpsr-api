@@ -1,13 +1,10 @@
 import text_en from "$client/Lang/english.json";
 import LifeProfessionTable from "$client/Tables/LifeProfessionTable.json";
-import LifeProductionListTable from "$client/Tables/LifeProductionListTable.json";
+import expByProfession from "./life_skills_exp"
 import gatherableItems from "./life_skills_gatherable_items";
 import craftableItems from "./life_skills_craftable_items";
-
 import { sortAlphabetically } from "../../utils";
 import { getBriefArr } from "./utils";
-
-// Should I add list of craftable items here?
 
 export default sortAlphabetically(
     Object.values(LifeProfessionTable)
@@ -19,7 +16,8 @@ export default sortAlphabetically(
                 ...profession,
                 Name: text_en[profession.Name],
                 Des: text_en[profession.Des],
-                recipes
+                recipes,
+                exp: expByProfession[profession.ProId]
             }
         })
 )
