@@ -13,3 +13,5 @@
 // EquipSuitTable → Equipment sets
 // EquipTable → All equipment
 // EquipWeaponTable → Weapons mapped to class and weapon skin
+
+export default {}

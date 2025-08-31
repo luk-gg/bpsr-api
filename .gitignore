@@ -20,6 +20,9 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
+**/ranking_*
+!/json/**/ranking_*
+
 # Ignore game files except for UI
 /game/*/**
 # !/game/client/Content

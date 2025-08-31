@@ -12,3 +12,5 @@
 // UnionTimelinessBuffTable     Boon buffs for fishing
 // UnionUpradingPurviewTable    Text: guild buildings upgrade description
 // UnionUpradingTable           Guild building levels
+
+export default {}
