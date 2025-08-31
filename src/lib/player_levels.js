@@ -27,6 +27,7 @@ export default Object.values(PlayerLevelTable)
             return acc
         }, {})
 
+        // Send the Title and Text in a separate JSON to avoid redundant data payload?
         const NacsStandard = level.NacsStandard.map(([moduleId, value]) => {
             const Title = text_en[AssessModuleTable[moduleId].Title]
             const TextDes = text_en[AssessModuleTable[moduleId].TextDes]
