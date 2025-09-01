@@ -4,6 +4,8 @@ import AssessModuleTable from "$client/Tables/AssessModuleTable.json"
 import AwardTable from "$client/Tables/AwardTable.json"
 import ItemTable from "$client/Tables/ItemTable.json"
 import ItemFunctionTable from "$client/Tables/ItemFunctionTable.json"
+import BuffTable from "$client/Tables/BuffTable.json"
+import PlayerLevelSkillTable from "$client/Tables/PlayerLevelSkillTable.json"
 import { getBriefData } from "./utils";
 
 const statMap = {
@@ -12,6 +14,18 @@ const statMap = {
     "11032": "agi",
     "11042": "sta",
 }
+
+const movementSkillMap = Object.values(PlayerLevelSkillTable)
+    .reduce((acc, curr) => {
+        if (!acc[curr.ActiveLevel]) acc[curr.ActiveLevel] = []
+        const buffData = BuffTable[curr.BuffId]
+        acc[curr.ActiveLevel].push({ 
+            Name: text_en[buffData.Name], 
+            Desc: text_en[buffData.Desc], 
+            Icon: buffData.Icon.split("/").pop()
+        })
+        return acc
+    }, {})
 
 // Replaces GroupContent item IDs with item data
 function getAwardItems(awardId) {
@@ -64,10 +78,13 @@ export default Object.values(PlayerLevelTable)
                     return item
                 })
 
+        const movementSkills = movementSkillMap[level.Level] ?? []
+
         return {
             ...level, // Mainly Level, Exp, TalentAward, FightValue
             LevelUpAttr,
             NacsStandard,
-            awardItems
+            awardItems,
+            movementSkills
         }
     })
