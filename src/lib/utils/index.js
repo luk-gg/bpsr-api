@@ -5,6 +5,6 @@ export function getBriefArr(arr) {
 }
 
 export function getBriefData(fullData) {
-    const { Id, Name, Type, Icon, Cost, NeedLevel } = fullData || {}
-    return { Id, Name: typeof Name === "number" ? text_en[Name] : Name, Type, Icon, Cost, NeedLevel }
+    const { Id, Name, Type, Icon, Cost, NeedLevel, Quality } = fullData || {}
+    return { Id, Name: typeof Name === "number" ? text_en[Name] : Name, Type, Icon, Cost, NeedLevel, Quality }
 }
