@@ -6,6 +6,10 @@ export default Object.values(UnionUpradingTable)
     .map((building) => {
         let upgradeDescription = ""
         let reqGuildCenterLv = 0
+        let reqExp = 0
+        let cost = 0
+        const name = text_en[building.Comment]
+        const level = building.Level
 
         if (building.Purview.length > 0) {
             const [purviewId, purviewVal1, purviewVal2] =  building.Purview[0]
@@ -18,10 +22,23 @@ export default Object.values(UnionUpradingTable)
             reqGuildCenterLv = building.UpgradingLimits[0][1]
         }
 
+        if (building.UnionBankroll.length > 0) {
+            cost = building.UnionBankroll[1]
+        }
+
+        if (building.UnionExp.length > 0) {
+            reqExp = building.UnionExp[1]
+        }
+        
         return {
-            ...building,
+            // ...building,
+            buildingId: building.BuildingId,
+            name,
+            level,
             upgradeDescription,
-            reqGuildCenterLv
+            reqGuildCenterLv,
+            cost,
+            reqExp
         }
     })
     .sort((a, b) => a.BuildingId - b.BuildingId)
