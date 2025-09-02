@@ -32,13 +32,14 @@ export default Object.values(UnionUpradingTable)
         
         return {
             // ...building,
-            buildingId: building.BuildingId,
+            id: building.BuildingId,
             name,
             level,
             upgradeDescription,
             reqGuildCenterLv,
             cost,
-            reqExp
+            reqExp,
+            buildTime: building.UpgradingTime
         }
     })
-    .sort((a, b) => a.BuildingId - b.BuildingId)
+    .sort((a, b) => a.id - b.id)
