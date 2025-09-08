@@ -18,16 +18,16 @@ const fightAttrs = fightAttrTable;
 
 /** @type {Record<string, string>} */
 const itemMap = Object.values(items).reduce((acc, item) => {
-    if (item?.Id && item?.['Name$english']) acc[item.Id] = item['Name$english'];
-    return acc;
+  if (item?.Id && item?.['Name$english']) acc[item.Id] = item['Name$english'];
+  return acc;
 }, {});
 
 /** @type {Record<string, string>} */
 const fightAttrMap = Object.values(fightAttrs).reduce((acc, attr) => {
-    if (attr?.AttrAdd && attr?.['OfficialName$english']) {
-        acc[attr.AttrAdd] = attr['OfficialName$english'].replace(/\u200b/g, '').trim();
-    }
-    return acc;
+  if (attr?.AttrAdd && attr?.['OfficialName$english']) {
+    acc[attr.AttrAdd] = attr['OfficialName$english'].replace(/\u200b/g, '').trim();
+  }
+  return acc;
 }, {});
 
 /** @type {Record<string, string>} */
@@ -35,39 +35,62 @@ const idMap = { ...itemMap, ...fightAttrMap };
 
 /** @type {Record<string, string>} */
 const conditionMap = Object.values(conditions).reduce((acc, cond) => {
-    if (cond?.Type && cond?.['ShowPurview$english']) {
-        acc[cond.Type] = cond['ShowPurview$english'];
-    }
-    return acc;
-}, {});
-
-/** @type {Record<string, string>} */
-const refineIdToGearMap = Object.values(equipParts).flatMap(part =>
-    (part.RefineId || []).map(ref => ref[1] && [ref[1], part['PartName$english']])
-).reduce((acc, pair) => {
-    if (pair) acc[pair[0]] = pair[1];
-    return acc;
+  if (cond?.Type && cond?.['ShowPurview$english']) {
+    acc[cond.Type] = cond['ShowPurview$english'];
+  }
+  return acc;
 }, {});
 
 /** @type {Record<string, string>} */
 const resolveId = (id, map, unknownPrefix = 'Unknown ID') => map[id] || `${unknownPrefix}: ${id}`;
 
-export default Object.values(equipRefines).map(entry => {
-    const gearName = refineIdToGearMap[entry.RefineId] || `Unknown Gear (RefineId: ${entry.RefineId})`;
+/**
+ * @type {Record<string, string[]>}
+ */
+const refineIdToGearMap = Object.values(equipParts).reduce((acc, part) => {
+  const gearName = part?.['PartName$english'];
+  if (!gearName || !part.RefineId) return acc;
 
-    const mapEffect = arr => (arr || []).map(e => e.length > 2 ? [resolveId(e[1], idMap), e[2]] : e.length > 1 ? [resolveId(e[1], idMap), e[0]] : e);
+  part.RefineId.forEach(ref => {
+    if (ref && ref.length > 1 && ref[0] === 1) {
+      const refineId = ref[1];
+      if (!acc[refineId]) {
+        acc[refineId] = [];
+      }
+      if (!acc[refineId].includes(gearName)) {
+        acc[refineId].push(gearName);
+      }
+    }
+  });
 
-    const mapCondition = arr => (arr || []).map(c => {
+  return acc;
+}, {});
+
+
+export default Object.values(equipRefines)
+  .flatMap(entry => {
+    const refineId = entry.RefineId;
+
+    if (!refineId || !refineIdToGearMap[refineId]) {
+      return [];
+    }
+
+    const gearNames = refineIdToGearMap[refineId];
+
+    return gearNames.map(gearName => {
+      const mapEffect = arr => (arr || []).map(e => e.length > 2 ? [resolveId(e[1], idMap), e[2]] : e.length > 1 ? [resolveId(e[1], idMap), e[0]] : e);
+
+      const mapCondition = arr => (arr || []).map(c => {
         if (c.length > 1) {
-            const [condId, condVal] = c;
-            return (conditionMap[condId] || `Unknown Condition ID: ${condId}`).replace('{*val*}', condVal.toString());
+          const [condId, condVal] = c;
+          return (conditionMap[condId] || `Unknown Condition ID: ${condId}`).replace('{*val*}', condVal.toString());
         }
         return null;
-    }).filter(Boolean);
+      }).filter(Boolean);
 
-    const mapConsume = arr => (arr || []).map(c => c.length > 0 ? [resolveId(c[0], idMap, 'Unknown Item ID'), ...c.slice(1)] : c);
+      const mapConsume = arr => (arr || []).map(c => c.length > 0 ? [resolveId(c[0], idMap, 'Unknown Item ID'), ...c.slice(1)] : c);
 
-    return {
+      return {
         RefineGear: gearName,
         RefineLevel: entry.RefineLevel,
         RefineEffect: mapEffect(entry.RefineEffect),
@@ -79,6 +102,7 @@ export default Object.values(equipRefines).map(entry => {
         SuccessRate: entry.SuccessRate,
         FailCompensateRate: entry.FailCompensateRate,
         FightValue: entry.FightValue,
-    };
-})
-    .sort((a, b) => a.RefineGear.localeCompare(b.RefineGear) || ((a.RefineLevel || 0) - (b.RefineLevel || 0)));
+      };
+    });
+  })
+  .sort((a, b) => a.RefineGear.localeCompare(b.RefineGear) || ((a.RefineLevel || 0) - (b.RefineLevel || 0)));
