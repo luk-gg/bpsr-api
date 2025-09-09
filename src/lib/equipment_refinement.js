@@ -20,6 +20,7 @@ const refinesMap = Object.values(EquipRefineTable)
     .reduce((acc, curr) => {
         if (!acc[curr.RefineId]) acc[curr.RefineId] = []
         const RefineEffect = curr.RefineEffect.map(([_, attrId, amount]) => `${attrNameMap[attrId]} +${amount}`)
+        const RefineLevelEffect = curr.RefineLevelEffect.map(([_, attrId, amount]) => `${attrNameMap[attrId]} +${amount}`)
         const RefineConsume = curr.RefineConsume.map(([itemId, amount]) => ({ ...getBriefData(ItemTable[itemId]), amount }))
         const ShowCondition = curr.ShowCondition.map(([conditionId, val1]) => text_en[ConditionTable[conditionId].ShowPurview].replace("{*val*}", val1))
         const Condition = curr.Condition.map(([conditionId, val1]) => text_en[ConditionTable[conditionId].ShowPurview].replace("{*val*}", val1))
@@ -27,6 +28,7 @@ const refinesMap = Object.values(EquipRefineTable)
         acc[curr.RefineId].push({
             ...curr,
             RefineEffect,
+            RefineLevelEffect,
             RefineConsume,
             ShowCondition,
             Condition,
