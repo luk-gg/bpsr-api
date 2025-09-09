@@ -77,12 +77,12 @@ function formatAttrDesc(desc, floatParams) {
         return { desc }
     }
     const functionMatcher = /{\*(?<funcName>.*?)\((?<params>.*?)\)\*}/gm
-    const paramsMatcher = /\{(?<match>[^}]*)\}|\((?<match>[^)]*)\)|"(?<match>[^"]*)"|(?<match>[^,(){}]+)/gm
+    const paramsMatcher = /\{(?<match1>[^}]*)\}|\((?<match2>[^)]*)\)|"(?<match3>[^"]*)"|(?<match4>[^,(){}]+)/gm
     let params = []
     let tags = new Set()
     for (const call of desc.matchAll(functionMatcher)) {
         const funcName = call.groups["funcName"].trim()
-        const args = [...call.groups["params"].matchAll(paramsMatcher)].map(x => x.groups["match"])
+        const args = [...call.groups["params"].matchAll(paramsMatcher)].map(x => x.groups["match1"] ?? x.groups["match2"] ?? x.groups["match3"] ?? x.groups["match4"])
         switch (funcName) {
             case 'skillpara.damageMerge':
                 const damageAttrKeys = args[1].split(",")
