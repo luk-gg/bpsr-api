@@ -9,8 +9,8 @@ const config = {
 			$server: path.resolve('.', 'game/server'),
 		},
 		files: {
-			routes: "utils/routes",
-			appTemplate: "utils/app.html"
+			routes: "util-routing/routes",
+			appTemplate: "util-routing/app.html"
 		},
 	}
 };
