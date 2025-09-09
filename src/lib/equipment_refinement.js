@@ -1,108 +1,45 @@
-import equipRefineTable from '$client/Tables/EquipRefineTable.json';
-import itemTable from '$client/Tables/ItemTable.json';
-import conditionTable from '$client/Tables/ConditionTable.json';
-import equipPartTable from '$client/Tables/EquipPartTable.json';
-import fightAttrTable from '$client/Tables/FightAttrTable.json';
-/** @import { EquipRefineTable, ItemTable, ConditionTable, EquipPartTable, FightAttrTable } from '../../game/client/Tables' */
+import EquipRefineTable from '$client/Tables/EquipRefineTable.json';
+import ItemTable from '$client/Tables/ItemTable.json';
+import ConditionTable from '$client/Tables/ConditionTable.json';
+import EquipPartTable from '$client/Tables/EquipPartTable.json';
+import FightAttrTable from '$client/Tables/FightAttrTable.json';
+import text_en from "$client/Lang/english.json";
+import { getBriefData } from './utils';
 
-/** @type {Record<string, EquipRefineTable>} */
-const equipRefines = equipRefineTable;
-/** @type {Record<string, ItemTable>} */
-const items = itemTable;
-/** @type {Record<string, ConditionTable>} */
-const conditions = conditionTable;
-/** @type {Record<string, EquipPartTable>} */
-const equipParts = equipPartTable;
-/** @type {Record<string, FightAttrTable>} */
-const fightAttrs = fightAttrTable;
+// AttrAdd: attrNameStr
+const attrNameMap = Object.values(FightAttrTable)
+    .reduce((acc, curr) => {
+        if (!acc[curr.AttrAdd]) acc[curr.AttrAdd] = []
+        acc[curr.AttrAdd] = text_en[curr.OfficialName]
+        return acc
+    }, {})
 
-/** @type {Record<string, string>} */
-const itemMap = Object.values(items).reduce((acc, item) => {
-  if (item?.Id && item?.['Name$english']) acc[item.Id] = item['Name$english'];
-  return acc;
-}, {});
+// RefineId: [refineTableObj]
+const refinesMap = Object.values(EquipRefineTable)
+    .reduce((acc, curr) => {
+        if (!acc[curr.RefineId]) acc[curr.RefineId] = []
+        const RefineEffect = curr.RefineEffect.map(([_, attrId, amount]) => `${attrNameMap[attrId]} +${amount}`)
+        const RefineConsume = curr.RefineConsume.map(([itemId, amount]) => ({ ...getBriefData(ItemTable[itemId]), amount }))
+        const ShowCondition = curr.ShowCondition.map(([conditionId, val1]) => text_en[ConditionTable[conditionId].ShowPurview].replace("{*val*}", val1))
+        const Condition = curr.Condition.map(([conditionId, val1]) => text_en[ConditionTable[conditionId].ShowPurview].replace("{*val*}", val1))
+        acc[curr.RefineId].push({
+            ...curr,
+            RefineEffect,
+            RefineConsume,
+            ShowCondition,
+            Condition
+        })
+        return acc
+    }, {})
 
-/** @type {Record<string, string>} */
-const fightAttrMap = Object.values(fightAttrs).reduce((acc, attr) => {
-  if (attr?.AttrAdd && attr?.['OfficialName$english']) {
-    acc[attr.AttrAdd] = attr['OfficialName$english'].replace(/\u200b/g, '').trim();
-  }
-  return acc;
-}, {});
-
-/** @type {Record<string, string>} */
-const idMap = { ...itemMap, ...fightAttrMap };
-
-/** @type {Record<string, string>} */
-const conditionMap = Object.values(conditions).reduce((acc, cond) => {
-  if (cond?.Type && cond?.['ShowPurview$english']) {
-    acc[cond.Type] = cond['ShowPurview$english'];
-  }
-  return acc;
-}, {});
-
-/** @type {Record<string, string>} */
-const resolveId = (id, map, unknownPrefix = 'Unknown ID') => map[id] || `${unknownPrefix}: ${id}`;
-
-/**
- * @type {Record<string, string[]>}
- */
-const refineIdToGearMap = Object.values(equipParts).reduce((acc, part) => {
-  const gearName = part?.['PartName$english'];
-  if (!gearName || !part.RefineId) return acc;
-
-  part.RefineId.forEach(ref => {
-    if (ref && ref.length > 1 && ref[0] === 1) {
-      const refineId = ref[1];
-      if (!acc[refineId]) {
-        acc[refineId] = [];
-      }
-      if (!acc[refineId].includes(gearName)) {
-        acc[refineId].push(gearName);
-      }
-    }
-  });
-
-  return acc;
-}, {});
-
-
-export default Object.values(equipRefines)
-  .flatMap(entry => {
-    const refineId = entry.RefineId;
-
-    if (!refineId || !refineIdToGearMap[refineId]) {
-      return [];
-    }
-
-    const gearNames = refineIdToGearMap[refineId];
-
-    return gearNames.map(gearName => {
-      const mapEffect = arr => (arr || []).map(e => e.length > 2 ? [resolveId(e[1], idMap), e[2]] : e.length > 1 ? [resolveId(e[1], idMap), e[0]] : e);
-
-      const mapCondition = arr => (arr || []).map(c => {
-        if (c.length > 1) {
-          const [condId, condVal] = c;
-          return (conditionMap[condId] || `Unknown Condition ID: ${condId}`).replace('{*val*}', condVal.toString());
+export default Object.values(EquipPartTable)
+    .reduce((acc, equipPart) => {
+        const PartName = text_en[equipPart.PartName]
+        const uniqueRefineIds = new Set(equipPart.RefineId.map(([_, id]) => id)) // 1001, 1002, 2001, 2002 ...
+        acc[PartName] = {}
+        for (const refineId of uniqueRefineIds) {
+            const variant = refineId.toString()[0] // 1: atk, 2: m.atk
+            acc[PartName][variant] = refinesMap[refineId]
         }
-        return null;
-      }).filter(Boolean);
-
-      const mapConsume = arr => (arr || []).map(c => c.length > 0 ? [resolveId(c[0], idMap, 'Unknown Item ID'), ...c.slice(1)] : c);
-
-      return {
-        RefineGear: gearName,
-        RefineLevel: entry.RefineLevel,
-        RefineEffect: mapEffect(entry.RefineEffect),
-        RefineLevelEffect: mapEffect(entry.RefineLevelEffect),
-        BuffPar: entry.BuffPar || [],
-        ShowCondition: mapCondition(entry.ShowCondition),
-        Condition: mapCondition(entry.Condition),
-        RefineConsume: mapConsume(entry.RefineConsume),
-        SuccessRate: entry.SuccessRate,
-        FailCompensateRate: entry.FailCompensateRate,
-        FightValue: entry.FightValue,
-      };
-    });
-  })
-  .sort((a, b) => a.RefineGear.localeCompare(b.RefineGear) || ((a.RefineLevel || 0) - (b.RefineLevel || 0)));
+        return acc
+    }, {})

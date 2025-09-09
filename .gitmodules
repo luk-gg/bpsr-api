@@ -1,3 +1,3 @@
-[submodule "api-utils"]
+[submodule "utils"]
 	path = utils
 	url = https://github.com/luk-gg/api-utils
