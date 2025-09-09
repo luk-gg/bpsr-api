@@ -1,0 +1,6 @@
+[submodule "util-routing"]
+	path = util-routing
+	url = https://github.com/luk-gg/util-routing
+[submodule "util-functions"]
+	path = util-functions
+	url = https://github.com/luk-gg/util-functions
