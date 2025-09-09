@@ -5,6 +5,7 @@ import EquipPartTable from '$client/Tables/EquipPartTable.json';
 import FightAttrTable from '$client/Tables/FightAttrTable.json';
 import text_en from "$client/Lang/english.json";
 import { getBriefData } from './utils';
+import { averageAttempts } from "../../util-functions/avgAttempts"
 
 // AttrAdd: attrNameStr
 const attrNameMap = Object.values(FightAttrTable)
@@ -22,12 +23,14 @@ const refinesMap = Object.values(EquipRefineTable)
         const RefineConsume = curr.RefineConsume.map(([itemId, amount]) => ({ ...getBriefData(ItemTable[itemId]), amount }))
         const ShowCondition = curr.ShowCondition.map(([conditionId, val1]) => text_en[ConditionTable[conditionId].ShowPurview].replace("{*val*}", val1))
         const Condition = curr.Condition.map(([conditionId, val1]) => text_en[ConditionTable[conditionId].ShowPurview].replace("{*val*}", val1))
+        const avgAttempts = averageAttempts(curr.SuccessRate / 10000, curr.FailCompensateRate / 10000)
         acc[curr.RefineId].push({
             ...curr,
             RefineEffect,
             RefineConsume,
             ShowCondition,
-            Condition
+            Condition,
+            avgAttempts
         })
         return acc
     }, {})
