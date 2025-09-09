@@ -1,13 +1,13 @@
 import text_en from "$client/Lang/english.json";
-import talentTable from "$client/Tables/TalentTable.json"
-import talentStageTable from "$client/Tables/TalentStageTable.json"
-import professionSystemTable from "$client/Tables/ProfessionSystemTable.json"
-import fightAttrTable from "$client/Tables/FightAttrTable.json"
-import talentTreeTable from "$client/Tables/TalentTreeTable.json"
-import itemTable from "$client/Tables/ItemTable.json"
-import attrDescription from "$client/Tables/AttrDescription.json"
-import skillTable from "$client/Tables/SkillTable.json"
-import modEffectTable from "$client/Tables/ModEffectTable.json"
+import attrDescription from "$client/Tables/AttrDescription.json";
+import fightAttrTable from "$client/Tables/FightAttrTable.json";
+import modEffectTable from "$client/Tables/ModEffectTable.json";
+import professionSystemTable from "$client/Tables/ProfessionSystemTable.json";
+import skillTable from "$client/Tables/SkillTable.json";
+import talentStageTable from "$client/Tables/TalentStageTable.json";
+import talentTable from "$client/Tables/TalentTable.json";
+import talentTreeTable from "$client/Tables/TalentTreeTable.json";
+import { formatConditions, formatItemCost } from "./utils";
 /** @import { ProfessionSystemTable, FightAttrTable, TalentStageTable, TalentTable, TalentTreeTable, ItemTable, AttrDescription, SkillTable, ModEffectTable } from '../../game/client/Tables' */
 
 /** @type {Record<string, ProfessionSystemTable>} */
@@ -20,8 +20,6 @@ const talentStages = talentStageTable
 const talentNodes = talentTreeTable
 /** @type {Record<string, TalentTable>} */
 const talents = talentTable
-/** @type {Record<string, ItemTable>} */
-const items = itemTable
 /** @type {Record<string, AttrDescription>} */
 const attrDescs = attrDescription
 /** @type {Record<string, SkillTable>} */
@@ -30,7 +28,6 @@ const skills = skillTable
 const modEffects = modEffectTable
 const conversionLookUp = {
     0: "Strength",
-    1: "Stamina",
     2: "Agility",
     3: "Intelligence"
 }
@@ -101,30 +98,14 @@ export default Object.values(talentStages).map(stage => ({
     talentNodes: walkTalent(stage.RootId).map(node => {
         const talent = talents[node.TalentId]
         return {
+            id: node.Id,
             name: text_en[talent.TalentName],
             desc: text_en[talent.TalentDes],
             icon: talent.TalentIcon,
             recommended: stage.RecommendTalent.includes(node.Id),
             unlockPoint: talent.TalentPointsConsume,
-            unlockItems: talent.UnlockConsume.map(([itemId, amount]) => {
-                const item = items[itemId]
-                return [{
-                    name: text_en[item.Name],
-                    desc: text_en[item.Description],
-                    desc_ext: text_en[item.Description2],
-                    icon: item.Icon,
-                    icon2: item.Icon2,
-                    type: item.Type
-                }, amount]
-            }),
-            condition: node.Unlock.map(([predicate, ...param]) => {
-                switch (predicate) {
-                    case 3:
-                        return `${param[0]} Talent Points spent`
-                    default:
-                        return ''
-                }
-            }),
+            unlockItems: formatItemCost(talent.UnlockConsume),
+            condition: formatConditions(node.Unlock),
             gearScore: talent.FightValue,
             talentLevel: talent.TalentLevel,
             effect: talent.TalentEffect.map(([predicate, ...param]) => {
@@ -140,7 +121,9 @@ export default Object.values(talentStages).map(stage => ({
                     default:
                         return ''
                 }
-            }).filter(x => !!x)
+            }).filter(x => !!x),
+            nodePos: node.TalentPosition,
+            nodeLink: node.NextTalent
         }
     }),
     mainAttributes: stage.MainAttrShow.map(x => attrLookUp[x]),
