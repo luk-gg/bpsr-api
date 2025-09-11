@@ -7,28 +7,28 @@ import convolve from "convolution";
 
 // Combvines Award and SpecialAward
 function getYields(recipe) {
-    if (recipe.Award.length < 1) return []
+    if (!recipe.Award || recipe.Award.length < 1) return []
 
     // LifeProductionListTable Award always seems to be an array with length === 1
     // LifeCollectListTable Award is a integer
+    const awardId = Array.isArray(recipe.Award) ? recipe.Award[0] : recipe.Award
+
     const baseYield = {
         condition: null,
-        rates: awardsMap[recipe.Award[0]]
+        rates: awardsMap[awardId] ?? awardPackagesMap[awardId]
     }
 
     const bonusYields = recipe.SpecialAward.map(([packId, conditionId]) => {
         const conditionData = LifeFormulaTable[conditionId]
 
         if (!baseYield.rates) console.log(recipe.Id)
-        if (packId === 21100012) console.log(baseYield.rates.map(({rate}) => rate))
-
-        // const baseRates = baseYield.rates.map(({rate}) => rate)
-        const bonusRates = awardPackagesMap[packId][0]
-
-        const rates = convolve([0.8, 0.2], [1 - 0.15, 0.15])
-
-        // const rates = awardPackagesMap[packId];
-
+            
+            const baseRates = baseYield.rates.map(({rate}) => rate)
+            // NOT TESTED ON awardPackagesMap[packId].length > 1
+            const bonusRates = awardPackagesMap[packId].flatMap(({rate}) => [1-rate, rate]) 
+            const rates = convolve(baseRates, bonusRates)
+            
+            if (packId === 21100012) console.log(bonusRates)
         return {
             condition: {
                 Name: text_en[conditionData.Name],
