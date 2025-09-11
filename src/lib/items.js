@@ -1,19 +1,25 @@
 import { getBriefArr } from "./utils"
 import itemRecipes from "./item_recipes"
+import usedInMap from "./item_used_in"
 import text_en from "$client/Lang/english.json";
 import ItemTable from "$client/Tables/ItemTable.json";
+import StallDetailTable from "$client/Tables/StallDetailTable.json";
 
 // Adds recipes at a depth of 1
 const itemsBase = Object.values(ItemTable).map(item => {
     const recipes = itemRecipes[item.Id] ?? []
-    const usedIn = []
+    const usedIn = usedInMap[item.Id] ?? []
+    const sellable = Boolean(StallDetailTable[item.Id])
+    const sellData = StallDetailTable[item.Id] || null
 
     return {
         ...item,
         Name: text_en[item.Name],
         Description: text_en[item.Description],
         recipes,
-        usedIn
+        usedIn,
+        sellable,
+        sellData
     }
 })
 
