@@ -36,7 +36,7 @@ function getYields(recipe, talentLevel) {
     console.log(recipe.Name$english, `(Talent Lv. ${talentLevel})\n`)
 
     // Rates for every AwardGroup (not every item) should be >= 1
-    return recipe.AwardGroups.map(awardGroup => {
+    return recipe.AwardGroups.flatMap(awardGroup => {
         const uniqItemIds = new Set(awardGroup.concat(talent.awards).map(({ itemId }) => itemId))
 
         // Every unique item has base rates and bonus rates
@@ -104,6 +104,7 @@ function getYields(recipe, talentLevel) {
 
         return yields
     })
+    .filter((itemRates) => itemRates.length)
 }
 
 function getAwards(recipe) {
@@ -128,6 +129,9 @@ export default testCases
     .map(recipe => {
         return {
             ...recipe,
+            talent_lv0_yields: getYields(recipe, 0),
+            talent_lv1_yields: getYields(recipe, 1),
+            talent_lv2_yields: getYields(recipe, 2),
             talent_lv3_yields: getYields(recipe, 3),
         }
     })
