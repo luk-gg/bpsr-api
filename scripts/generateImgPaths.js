@@ -3,7 +3,12 @@ import * as fs from "fs";
 import { sortAlphabetically } from "../util-functions/sortAlphabetically.js";
 
 // Generate a list of regexes to include in .gitignore to only push the images that are needed (otherwise this shit is like 20gb lmfao)
-const regexes = new Set(entries
+const regexes = new Set(
+    [
+        { Icon: "ui/atlas/permanent/item_quality_" },
+        { Icon: "ui/atlas/life_profession/life_icon_" },
+        ...entries
+    ]
     .flatMap(({ Icon, Name }) => {
         const prefix = "!/game/client/Assets/"
         const [first, second] = Icon.split("_")

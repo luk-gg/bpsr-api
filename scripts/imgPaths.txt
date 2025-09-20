@@ -50,6 +50,8 @@
 !/game/client/Assets/term_task**
 !/game/client/Assets/ui
 !/game/client/Assets/ui/atlas
+!/game/client/Assets/ui/atlas/life_profession**
+!/game/client/Assets/ui/atlas/permanent**
 !/game/client/Assets/ui/atlas/personalzone_medal**
 !/game/client/Assets/ui/atlas/weap_icon**
 !/game/client/Assets/yellow_crystal**
