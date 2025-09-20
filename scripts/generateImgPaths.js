@@ -8,6 +8,8 @@ const regexes = new Set(
     [
         { Icon: "ui/atlas/permanent/item_quality_" },
         { Icon: "ui/atlas/life_profession/life_icon_" },
+        { Icon: "ui/atlas/npc/talk_icon_" },
+        { Icon: "ui/atlas/proficiency/proficiency_skill_" },
         ...entries
     ]
     .flatMap(({ Icon, Name }) => {

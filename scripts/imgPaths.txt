@@ -51,7 +51,9 @@
 !/game/client/Assets/ui
 !/game/client/Assets/ui/atlas
 !/game/client/Assets/ui/atlas/life_profession**
+!/game/client/Assets/ui/atlas/npc**
 !/game/client/Assets/ui/atlas/permanent**
 !/game/client/Assets/ui/atlas/personalzone_medal**
+!/game/client/Assets/ui/atlas/proficiency**
 !/game/client/Assets/ui/atlas/weap_icon**
 !/game/client/Assets/yellow_crystal**
