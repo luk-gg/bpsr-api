@@ -3,6 +3,7 @@ import * as fs from "fs";
 import { sortAlphabetically } from "../util-functions/sortAlphabetically.js";
 
 // Generate a list of regexes to include in .gitignore to only push the images that are needed (otherwise this shit is like 20gb lmfao)
+console.log(entries.find(entry => entry.Name.includes("Sapphire")))
 const regexes = new Set(
     [
         { Icon: "ui/atlas/permanent/item_quality_" },
