@@ -5,7 +5,7 @@ import LifeFormulaTable from "$client/Tables/LifeFormulaTable.json"; // contains
 import awardsMap from "./awards";
 import awardPackagesMap from "./award_packages";
 import testCases from "./tests/_test_sources_life_skill";
-import { completeCommonData, getAllText } from "./utils";
+import { completeCommonData, getBriefItemWithAmount } from "./utils";
 
 // Spreads an item of { min 1, max 5 } to 5 items: { amount 1 }, ... { amount 5 },
 function expandAmounts(items) {
@@ -159,6 +159,13 @@ export default
         }
     })
     .reduce((acc, curr) => {
-        acc[curr.Id] = { ...curr, ...completeCommonData(curr) }
+        acc[curr.Id] = { 
+            ...curr, 
+            ...completeCommonData(curr),
+            NeedMaterial: curr.NeedMaterial
+                // Canned Fish has some materials that are [0, 0]; is this related to custom cooking? Filtering out for now
+                ?.filter(([itemId, amount]) => itemId > 0 && amount > 0)
+                .map(arr => getBriefItemWithAmount(arr))
+        }
         return acc
     }, {})

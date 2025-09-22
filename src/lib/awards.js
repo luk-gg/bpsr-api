@@ -1,4 +1,5 @@
 import AwardTable from "$client/Tables/AwardTable.json";
+import { getBriefItem } from "./utils";
 
 // Note: amounts are presumably unweighted, so avgAmount is simply (min + max) / 2
 
@@ -27,11 +28,16 @@ function getAwardDrops(award) {
 
         const rate = 1 / groupSize * weight;
 
+        const { Name, Icon, Quality } = getBriefItem(itemId)
+
         return {
             itemId,
+            Name,
             rate,
             minAmount,
             maxAmount,
+            Icon,
+            Quality,
         }
     })
 }

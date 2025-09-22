@@ -19,17 +19,25 @@ export function getBriefData(fullData) {
     return { Id, Name: typeof Name === "number" ? text_en[Name] : Name, Type, Icon, Cost, NeedLevel, Quality, sellable }
 }
 
-export function getBriefItemWithAmount([itemId, amount]) {
+export function getBriefItem(itemId) {
+    return getBriefData(ItemTable[itemId])
+}
+
+export function getBriefItemWithAmount(arr) {
+    if (!arr) return
+    const [itemId, amount] = arr
     return { ...getBriefData(ItemTable[itemId]), amount }
 }
 
 export function getAllText(entry) {
     return Object.keys(entry)
+        // Name, Des, Description, Description2, ShowPurview
         .filter(key => key.endsWith("$english"))
         .reduce((acc, key) => {
             const originalKey = key.slice(0, key.indexOf("$"))
             const textId = entry[originalKey]
             acc[originalKey] = text_en[textId]
+            acc[key] = undefined
             return acc
         }, {})
 }
@@ -37,9 +45,9 @@ export function getAllText(entry) {
 export function completeCommonData(entry) {
     return {
         ...getAllText(entry),
-        // Exp: getBriefItemWithAmount(entry.Exp),
-        // Cost: getBriefItemWithAmount(entry.Cost),
-        UnlockCondition: getConditions(entry.UnlockCondition)
+        Exp: getBriefItemWithAmount(entry.Exp),
+        Cost: getBriefItemWithAmount(entry.Cost),
+        UnlockCondition: getConditions(entry.UnlockCondition),
         // ...getQuickJump(entry),
     }
 }

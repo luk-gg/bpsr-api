@@ -1,24 +1,27 @@
-import { getBriefArr } from "./utils"
+import { completeCommonData, getBriefArr } from "./utils"
 // import usedInMap from "./item_used_in"
 import text_en from "$client/Lang/english.json";
 import ItemTable from "$client/Tables/ItemTable.json";
+import ItemTypeTable from "$client/Tables/ItemTypeTable.json";
 import StallDetailTable from "$client/Tables/StallDetailTable.json";
+import sourcesMap from "./sources";
+import usedInMap from "./item_used_in";
 
 // Adds recipes at a depth of 1
 const itemsBase = Object.values(ItemTable).map(item => {
-    const recipes = []
-    const usedIn = []
+    const usedIn = usedInMap[item.Id] ?? []
+    const sources = sourcesMap[item.Id]
     const sellable = Boolean(StallDetailTable[item.Id])
     const sellData = StallDetailTable[item.Id] || null
 
     return {
         ...item,
-        Name: text_en[item.Name],
-        Description: text_en[item.Description],
-        recipes,
+        ...completeCommonData(item),
+        // sellable,
+        // storable?,
+        // sellData,
         usedIn,
-        sellable,
-        sellData
+        sources,
     }
 })
 
@@ -50,6 +53,7 @@ function walkRecipeTree(recipe) {
 
 // Recursively iterates recipes to replace material IDs with item objects
 const entries = itemsBase.map((item) => {
+    return item
     const recipes = item.recipes.map(recipe => walkRecipeTree(recipe))
     return {
         ...item,

@@ -1,16 +1,17 @@
-import LifeCollectListTable from "$client/Tables/LifeCollectListTable.json";
 import itemRecipes from "./sources_life_skill"
-import ItemTable from "$client/Tables/ItemTable.json";
-import { getBriefData } from "./utils";
+import { getBriefItemWithAmount } from "./utils";
 
-const allRecipes = Object.values(itemRecipes).flat()
+export default Object.values(itemRecipes)
+    .reduce((acc, recipe) => {
+        const itemId = recipe.RelatedItemId
 
-export default {}
-// export default Object.values(ItemTable)
-//     .reduce((acc, item) => {
-//         const usedIn = allRecipes
-//             .filter(recipe => recipe.NeedMaterial.some(([id]) => id === item.Id))
-//             .map(recipe => getBriefData(recipe))
-//         if (usedIn.length) acc[item.Id] = usedIn
-//         return acc
-//     }, {})
+        if (!itemId && recipe.NeedMaterial?.length > 0) console.log("Recipe has no output item id but has required materials:", recipe.Id)
+
+        if (itemId) {
+            for (const { Id: matId, amount } of recipe.NeedMaterial) {
+                if (!acc[matId]) acc[matId] = []
+                acc[matId].push(getBriefItemWithAmount([itemId, amount]))
+            }
+        }
+        return acc
+    }, {})

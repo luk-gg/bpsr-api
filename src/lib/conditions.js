@@ -5,7 +5,11 @@ import LifeProfessionTable from "$client/Tables/LifeProfessionTable.json";
 import text_en from "$client/Lang/english.json";
 
 export function getConditions(conditions) {
-    return conditions.map(([conditionType, ...params]) => {
+    if (!conditions) return
+    return conditions.map((condition) => {
+        if (typeof condition === "string") return condition // already been processed
+        const [conditionType, ...params] = condition
+        
         switch (conditionType) {
             case 1:
                 if (params.length > 1) {
