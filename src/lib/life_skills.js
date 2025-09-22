@@ -1,23 +1,40 @@
-import text_en from "$client/Lang/english.json";
 import LifeProfessionTable from "$client/Tables/LifeProfessionTable.json";
-import expByProfession from "./life_skills_exp"
-import gatherableItems from "./life_skills_gatherable_items";
-import craftableItems from "./life_skills_craftable_items";
 import { sortAlphabeticallyOnce } from "../../util-functions/sortAlphabetically";
-import { getBriefArr } from "./utils";
+import { completeCommonData, getBriefData } from "./utils";
+import sources_life_skill from "./sources_life_skill";
+import LifeExpTable from "$client/Tables/LifeExpTable.json";
+
+const expTypes = {}
+
+const recipesByProfessionId = Object.values(sources_life_skill)
+    .reduce((acc, recipe) => {
+        if (!acc[recipe.LifeProId]) acc[recipe.LifeProId] = []
+        expTypes[recipe.LifeProId] = { ...recipe.Exp, amount: undefined }
+        acc[recipe.LifeProId].push(getBriefData(recipe))
+        return acc
+    }, {})
+
+// Assumes the levels in the table are in order, not [Lv. 2, Lv. 1, Lv 3]
+const expByProfessionId = Object.values(LifeExpTable)
+    .reduce((acc, curr) => {
+        if (!acc[curr.ProId]) acc[curr.ProId] = []
+        acc[curr.ProId].push(curr.Exp[1] ?? null)
+        return acc
+    }, {})
 
 export default
     Object.values(LifeProfessionTable)
         .map((profession) => {
-            const recipes = getBriefArr([...gatherableItems, ...craftableItems]
-                .filter(recipe => recipe.LifeProId === profession.ProId))
+            const recipes = recipesByProfessionId[profession.ProId]
+            const exp = expByProfessionId[profession.ProId]
+            const expType = expTypes[profession.ProId]
 
             return {
                 ...profession,
-                Name: text_en[profession.Name],
-                Des: text_en[profession.Des],
+                ...completeCommonData(profession),
                 recipes,
-                exp: expByProfession[profession.ProId]
+                exp,
+                expType
             }
         })
         .sort((a, b) =>

@@ -7,6 +7,9 @@ import awardPackagesMap from "./award_packages";
 import testCases from "./tests/_test_sources_life_skill";
 import { completeCommonData, getBriefItemWithAmount } from "./utils";
 
+// TODO: Add housing items from HousingItems.json (they don't use NeedMaterial and have extra keys)
+// Old Dock Wooden Crate (Item 11010155) (Recipe 2050307) (Function 102503) (HousingItem 11010155)
+
 // Spreads an item of { min 1, max 5 } to 5 items: { amount 1 }, ... { amount 5 },
 function expandAmounts(items) {
     const expanded = new Map();
@@ -165,6 +168,7 @@ export default
             NeedMaterial: curr.NeedMaterial
                 // Canned Fish has some materials that are [0, 0]; is this related to custom cooking? Filtering out for now
                 ?.filter(([itemId, amount]) => itemId > 0 && amount > 0)
+                // TODO: Fix items with NeedMaterialType 2 (use CookMaterialTypeTable); these are ingredient slots that can have multiple options
                 .map(arr => getBriefItemWithAmount(arr))
         }
         return acc
