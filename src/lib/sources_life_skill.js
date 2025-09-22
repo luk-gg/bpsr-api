@@ -1,10 +1,11 @@
 import text_en from "$client/Lang/english.json";
 import LifeCollectListTable from "$client/Tables/LifeCollectListTable.json";
 import LifeProductionListTable from "$client/Tables/LifeProductionListTable.json";
-import LifeFormulaTable from "$client/Tables/LifeFormulaTable.json";
+import LifeFormulaTable from "$client/Tables/LifeFormulaTable.json"; // contains talents
 import awardsMap from "./awards";
 import awardPackagesMap from "./award_packages";
 import testCases from "./tests/_test_sources_life_skill";
+import { completeCommonData, getAllText } from "./utils";
 
 // Spreads an item of { min 1, max 5 } to 5 items: { amount 1 }, ... { amount 5 },
 function expandAmounts(items) {
@@ -33,7 +34,7 @@ function expandAmounts(items) {
 
 function getYields(recipe, talentLevel) {
     const talent = recipe.SpecialAward[talentLevel - 1] ?? { awards: [] }
-    console.log(recipe.Name$english, `(Talent Lv. ${talentLevel})\n`)
+    // console.log(recipe.Name$english, `(Talent Lv. ${talentLevel})\n`)
 
     // Rates for every AwardGroup (not every item) should be >= 1
     return recipe.AwardGroups.flatMap(awardGroup => {
@@ -50,10 +51,10 @@ function getYields(recipe, talentLevel) {
                     talent.awards.filter(({ itemId }) => itemId === uniqItemId)
                 )
 
-                if (baseAwards.length > 0 && bonusAwards.length > 0) {
-                    console.log("Base rates\n", baseAwards)
-                    console.log("Bonus rates\n", bonusAwards)
-                }
+                // if (baseAwards.length > 0 && bonusAwards.length > 0) {
+                //     console.log("Base rates\n", baseAwards)
+                //     console.log("Bonus rates\n", bonusAwards)
+                // }
 
                 let results = baseAwards;
 
@@ -97,7 +98,7 @@ function getYields(recipe, talentLevel) {
 
                 // console.log("item:", uniqItemId, "rates:", baseAwards.map(({ rate }) => rate), "bonuses:", bonusAwards.map(({ rate }) => rate), "final:", results)
 
-                if (baseAwards.length > 0 && bonusAwards.length > 0) console.log("Results\n", results, "\n")
+                // if (baseAwards.length > 0 && bonusAwards.length > 0) console.log("Results\n", results, "\n")
 
                 return results
             })
@@ -108,24 +109,46 @@ function getYields(recipe, talentLevel) {
 }
 
 function getAwards(recipe) {
-    return recipe.Award.map(awardId => awardsMap[awardId] ?? awardPackagesMap[awardId])
+    // LifeProduction
+    if (Array.isArray(recipe.Award)) {
+        return recipe.Award.map(awardId => awardsMap[awardId] ?? awardPackagesMap[awardId])
+    }
+    // LifeCollect
+    const freeAwardGroup = awardPackagesMap[recipe.FreeAward] ?? awardsMap[recipe.FreeAward]
+    const result = [freeAwardGroup.map(award => ({ ...award, isFree: true }))]
+    if (recipe.Award > 0) {
+        const awardGroup = awardsMap[recipe.Award] ?? awardPackagesMap[recipe.Award]
+        // Check to make sure our assumption is correct: that Award for LifeCollect will only result in one unique item id which we will use to link to ItemTable
+        const uniqItemIds = [...new Set(awardGroup.map(award => award.itemId))]
+        if (uniqItemIds.length > 1) console.log(`WARNING: Recipe ${recipe.Id} yields multiple items from Award ${recipe.Award}:`, uniqItemIds)
+        result.push(awardGroup)
+    }
+    return result
 }
 
 function getSpecialAwards(recipe) {
     return recipe.SpecialAward.map(([packId, talentId]) => ({
         // LifeFormulaTable Levels are all set to 1... however they are sorted in order by id
-        talent: LifeFormulaTable[talentId].Name$english,
+        talentName: text_en[LifeFormulaTable[talentId].Name],
         awards: awardPackagesMap[packId],
     }))
 }
 
-export default testCases
+// Note: recipes may not always drop the item they represent; i.e. Helmflower recipe does not drop the Helmflower found in ItemTable. 
+// Helmflower's item id can be traced through ItemTable → ObtainWayTable → CollectionTable → AwardPackageTable → AwardTable which shows that it exists, but it cannot actually be obtained from gathering Helmflower.
+// It's possible that Helmflower requires Focused gathering to obtain since the Award has BindInfo: 1 (unbound); however Focused Helmflower is unavailable as Cost is 0 and Award is 0
+export default 
+    // testCases
+    [
+        ...Object.values(LifeCollectListTable),
+        ...Object.values(LifeProductionListTable)
+    ]
     // Needed to get the correct format from the recipe tables
-    // .map(recipe => ({
-    //     ...recipe,
-    //     AwardGroups: getAwards(recipe),
-    //     SpecialAward: getSpecialAwards(recipe)
-    // }))
+    .map(recipe => ({
+        ...recipe,
+        AwardGroups: getAwards(recipe),
+        SpecialAward: getSpecialAwards(recipe)
+    }))
     .map(recipe => {
         return {
             ...recipe,
@@ -135,3 +158,7 @@ export default testCases
             talent_lv3_yields: getYields(recipe, 3),
         }
     })
+    .reduce((acc, curr) => {
+        acc[curr.Id] = { ...curr, ...completeCommonData(curr) }
+        return acc
+    }, {})

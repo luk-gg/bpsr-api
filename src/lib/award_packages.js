@@ -45,8 +45,6 @@ function getPackageAwards(pack) {
                 rate,
                 minAmount,
                 maxAmount,
-                // Assumption: min and max are unweighted
-                avgAmount: (minAmount + maxAmount) / 2
             }
         })
     })

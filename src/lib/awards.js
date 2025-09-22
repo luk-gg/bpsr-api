@@ -1,5 +1,7 @@
 import AwardTable from "$client/Tables/AwardTable.json";
 
+// Note: amounts are presumably unweighted, so avgAmount is simply (min + max) / 2
+
 // RandomRule 1: give all
 // RandomRule 2: give 1, equal chances
 // RandomRule 3: give each, individual chances
@@ -30,8 +32,6 @@ function getAwardDrops(award) {
             rate,
             minAmount,
             maxAmount,
-            // Assumption: min and max are unweighted
-            avgAmount: (minAmount + maxAmount) / 2
         }
     })
 }

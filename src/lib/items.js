@@ -1,8 +1,12 @@
-import { getBriefArr } from "./utils"
+import { getBriefArr, getBriefData } from "./utils"
 // import usedInMap from "./item_used_in"
 import text_en from "$client/Lang/english.json";
 import ItemTable from "$client/Tables/ItemTable.json";
 import StallDetailTable from "$client/Tables/StallDetailTable.json";
+
+export function getBriefItemWithAmount([itemId, amount]) {
+    return { ...getBriefData(ItemTable[itemId]), amount }
+}
 
 // Adds recipes at a depth of 1
 const itemsBase = Object.values(ItemTable).map(item => {
