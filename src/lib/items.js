@@ -4,7 +4,7 @@ import text_en from "$client/Lang/english.json";
 import ItemTable from "$client/Tables/ItemTable.json";
 import ItemTypeTable from "$client/Tables/ItemTypeTable.json";
 import StallDetailTable from "$client/Tables/StallDetailTable.json";
-import sourcesMap from "./sources";
+import sourcesMap from "./item_sources";
 import usedInMap from "./item_used_in";
 
 // Adds recipes at a depth of 1
