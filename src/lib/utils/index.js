@@ -2,14 +2,13 @@ import text_en from "$client/Lang/english.json";
 import ItemTable from "$client/Tables/ItemTable.json";
 import SkillTable from "$client/Tables/SkillTable.json";
 import { getConditions } from "../conditions";
-import { getBriefItemWithAmount } from "../items";
 
 /** @import { ItemTable, SkillTable } from '../../../game/client/Tables' */
 
 /** @type {Record<string, ItemTable>} */
-const items = ItemTable
+const items = ItemTable;
 /** @type {Record<string, SkillTable>} */
-const skills = SkillTable
+const skills = SkillTable;
 
 export function getBriefArr(arr) {
     return arr.map(data => getBriefData(data))
@@ -18,6 +17,10 @@ export function getBriefArr(arr) {
 export function getBriefData(fullData) {
     const { Id, Name, Type, Icon, Cost, NeedLevel, Quality, sellable } = fullData || {}
     return { Id, Name: typeof Name === "number" ? text_en[Name] : Name, Type, Icon, Cost, NeedLevel, Quality, sellable }
+}
+
+export function getBriefItemWithAmount([itemId, amount]) {
+    return { ...getBriefData(ItemTable[itemId]), amount }
 }
 
 export function getAllText(entry) {
@@ -34,8 +37,8 @@ export function getAllText(entry) {
 export function completeCommonData(entry) {
     return {
         ...getAllText(entry),
-        Exp: getBriefItemWithAmount(entry.Exp),
-        Cost: getBriefItemWithAmount(entry.Cost),
+        // Exp: getBriefItemWithAmount(entry.Exp),
+        // Cost: getBriefItemWithAmount(entry.Cost),
         UnlockCondition: getConditions(entry.UnlockCondition)
         // ...getQuickJump(entry),
     }
