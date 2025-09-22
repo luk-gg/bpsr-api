@@ -3,6 +3,7 @@ import { sortAlphabeticallyOnce } from "../../util-functions/sortAlphabetically"
 import { completeCommonData, getBriefData } from "./utils";
 import lifeSkillRecipes from "./life_skill_recipes";
 import LifeExpTable from "$client/Tables/LifeExpTable.json";
+import LifeFormulaTable from "$client/Tables/LifeFormulaTable.json"; // contains talents
 
 const expTypes = {}
 
@@ -22,19 +23,28 @@ const expByProfessionId = Object.values(LifeExpTable)
         return acc
     }, {})
 
+const talentsByProfessionId = Object.values(LifeFormulaTable)
+    .reduce((acc, curr) => {
+        if (!acc[curr.ProId]) acc[curr.ProId] = []
+        acc[curr.ProId].push({ ...curr, ...completeCommonData(curr) })
+        return acc
+    }, {})
+
 export default
     Object.values(LifeProfessionTable)
         .map((profession) => {
             const recipes = recipesByProfessionId[profession.ProId]
             const exp = expByProfessionId[profession.ProId]
             const expType = expTypes[profession.ProId]
+            const talents = talentsByProfessionId[profession.ProId]
 
             return {
                 ...profession,
                 ...completeCommonData(profession),
                 recipes,
                 exp,
-                expType
+                expType,
+                talents
             }
         })
         .sort((a, b) =>
