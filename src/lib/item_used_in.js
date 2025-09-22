@@ -1,4 +1,4 @@
-import itemRecipes from "./sources_life_skill"
+import lifeSkillRecipes from "./life_skill_recipes"
 import { getBriefItemWithAmount } from "./utils";
 import HousingItems from "$client/Tables/HousingItems.json";
 
@@ -15,7 +15,7 @@ const housingRecipesByMatId = Object.values(HousingItems)
         return acc
     }, {})
 
-export default Object.values(itemRecipes)
+export default Object.values(lifeSkillRecipes)
     .reduce((acc, recipe) => {
         const itemId = recipe.RelatedItemId
 

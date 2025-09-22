@@ -1,12 +1,12 @@
 import LifeProfessionTable from "$client/Tables/LifeProfessionTable.json";
 import { sortAlphabeticallyOnce } from "../../util-functions/sortAlphabetically";
 import { completeCommonData, getBriefData } from "./utils";
-import sources_life_skill from "./sources_life_skill";
+import lifeSkillRecipes from "./life_skill_recipes";
 import LifeExpTable from "$client/Tables/LifeExpTable.json";
 
 const expTypes = {}
 
-const recipesByProfessionId = Object.values(sources_life_skill)
+const recipesByProfessionId = Object.values(lifeSkillRecipes)
     .reduce((acc, recipe) => {
         if (!acc[recipe.LifeProId]) acc[recipe.LifeProId] = []
         expTypes[recipe.LifeProId] = { ...recipe.Exp, amount: undefined }

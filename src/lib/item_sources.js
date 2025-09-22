@@ -1,6 +1,6 @@
 import ObtainWayTable from "$client/Tables/ObtainWayTable.json"
 import FunctionTable from "$client/Tables/FunctionTable.json"
-import lifeSkillSources from "./sources_life_skill";
+import lifeSkillSources from "./life_skill_recipes";
 import { getAllText } from "./utils";
 
 // Currently uses the in-game list of ways to obtain items. May benefit from doing a manual pass through all possible ways to obtain items to catch any missing sources.
