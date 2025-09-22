@@ -31,10 +31,11 @@ export function getConditions(conditions) {
             case 59:
                 const talent = Object.values(LifeFormulaTable).find(talent => talent.GroupId === params[0])
                 params[0] = text_en[talent.Name]
+            case 45:
             case 60:
                 break
             default:
-                console.log(`Unknown Condition: ${[conditionType, ...params]}`)
+                console.log("Unknown Condition:", [conditionType, ...params])
                 return [conditionType, ...params]
         }
 

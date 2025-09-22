@@ -7,9 +7,9 @@ import awardsMap from "./awards";
 import awardPackagesMap from "./award_packages";
 import testCases from "./tests/_test_sources_life_skill";
 import { completeCommonData, getBriefItemWithAmount } from "./utils";
+import HousingItems from "$client/Tables/HousingItems.json";
 
-// TODO: Add housing items from HousingItems.json (they don't use NeedMaterial and have extra keys)
-// Old Dock Wooden Crate (Item 11010155) (Recipe 2050307) (Function 102503) (HousingItem 11010155)
+// Logic must be revisited if they add more unique talents such as chance to not consume materials
 
 // Spreads an item of { min 1, max 5 } to 5 items: { amount 1 }, ... { amount 5 },
 function expandAmounts(items) {
@@ -40,8 +40,8 @@ function getYields(recipe, talentLevel) {
     const talent = recipe.SpecialAward[talentLevel - 1] ?? { awards: [] }
     // console.log(recipe.Name$english, `(Talent Lv. ${talentLevel})\n`)
 
-    // Rates for every AwardGroup (not every item) should be >= 1
-    return recipe.AwardGroups.flatMap(awardGroup => {
+    // Rates for every awardGroup (not every item) should be >= 1
+    return recipe.awardGroups.flatMap(awardGroup => {
         const uniqItemIds = new Set(awardGroup.concat(talent.awards).map(({ itemId }) => itemId))
 
         // Every unique item has base rates and bonus rates
@@ -109,7 +109,7 @@ function getYields(recipe, talentLevel) {
 
         return yields
     })
-    .filter((itemRates) => itemRates.length)
+        .filter((itemRates) => itemRates.length)
 }
 
 function getAwards(recipe) {
@@ -131,56 +131,86 @@ function getAwards(recipe) {
 }
 
 function getSpecialAwards(recipe) {
-    return recipe.SpecialAward.map(([packId, talentId]) => ({
-        // LifeFormulaTable Levels are all set to 1... however they are sorted in order by id
-        talentName: text_en[LifeFormulaTable[talentId].Name],
-        awards: awardPackagesMap[packId],
-    }))
+    return recipe.SpecialAward.map(([packId, talentId]) => {
+        // getYields()'s talentLevel gets the appropriate SpecialAward by index (assumes talents are in order by ascending level)
+        // LifeFormulaTable Levels are all set to 1, but they are already in order in the table for now
+        const talent = LifeFormulaTable[talentId]
+        const { Icon, NeedPoint } = talent
+        return {
+            ...completeCommonData(talent),
+            Icon,
+            NeedPoint,
+            awards: awardPackagesMap[packId],
+        }
+    })
+}
+
+// Adds housing recipe ingredients from HousingItems.json (they don't use NeedMaterial and have extra keys)
+// Old Dock Wooden Crate (Item 11010155) (Recipe 2050307) (Function 102503) (HousingItem 11010155)
+function getMaterials(recipe) {
+    const result = {}
+    let mats = recipe.NeedMaterial
+
+    const furniture = recipe.RelatedItemId && HousingItems[recipe.RelatedItemId]
+    if (furniture) {
+        const furnitureMats = [...furniture.Consume, furniture.ConsumeCash]
+        if (furnitureMats.flat().length > 0) {
+            mats = mats.concat(furnitureMats)
+        }
+        // Ignore furniture.UnlockCondition; the condition is simply to unlock the recipe
+        // Not sure what Build and Exist keys do
+        result.HousingExp = furniture.Exp
+        result.BuildTime = furniture.BuildTime
+    }
+
+    result.materials = mats
+        // Canned Fish has some materials that are [0, 0]; is this related to custom cooking? Filtering out for now
+        ?.filter(([itemId, amount]) => itemId > 0 && amount > 0)
+        .map(([matId, amount]) => {
+            switch (recipe.NeedMaterialType) {
+                case 1:
+                    return getBriefItemWithAmount([matId, amount])
+                // Recipes that allow multiple ingredients in a slot (i.e. any Lv.1 Fish)
+                case 2:
+                    const material = CookMaterialTypeTable[matId]
+                    return { ...material, ...completeCommonData(material), amount }
+                default:
+                    console.log("Unhandled NeedMaterialType", recipe.NeedMaterialType, `(Recipe ${recipe.Id})`)
+            }
+        })
+
+    return result
 }
 
 // Note: recipes may not always drop the item they represent; i.e. Helmflower recipe does not drop the Helmflower found in ItemTable. 
 // Helmflower's item id can be traced through ItemTable → ObtainWayTable → CollectionTable → AwardPackageTable → AwardTable which shows that it exists, but it cannot actually be obtained from gathering Helmflower.
 // It's possible that Helmflower requires Focused gathering to obtain since the Award has BindInfo: 1 (unbound); however Focused Helmflower is unavailable as Cost is 0 and Award is 0
-export default 
+export default
     // testCases
     [
         ...Object.values(LifeCollectListTable),
         ...Object.values(LifeProductionListTable)
     ]
-    // Needed to get the correct format from the recipe tables
-    .map(recipe => ({
-        ...recipe,
-        AwardGroups: getAwards(recipe),
-        SpecialAward: getSpecialAwards(recipe)
-    }))
-    .map(recipe => {
-        return {
+        // Needed to get the correct format from the recipe tables
+        .map(recipe => ({
             ...recipe,
-            talent_lv0_yields: getYields(recipe, 0),
-            talent_lv1_yields: getYields(recipe, 1),
-            talent_lv2_yields: getYields(recipe, 2),
-            talent_lv3_yields: getYields(recipe, 3),
-        }
-    })
-    .reduce((acc, curr) => {
-        acc[curr.Id] = { 
-            ...curr, 
-            ...completeCommonData(curr),
-            NeedMaterial: curr.NeedMaterial
-                // Canned Fish has some materials that are [0, 0]; is this related to custom cooking? Filtering out for now
-                ?.filter(([itemId, amount]) => itemId > 0 && amount > 0)
-                .map(([matId, amount]) => {
-                    switch (curr.NeedMaterialType) {
-                        case 1:
-                            return getBriefItemWithAmount([matId, amount])
-                        case 2:
-                            const material = CookMaterialTypeTable[matId]
-                            return { ...material, ...completeCommonData(material), amount }
-                        default:
-                            console.log("Unhandled NeedMaterialType", curr.NeedMaterialType, `(Recipe ${curr.Id})`)
-                    }
-                })
-
-        }
-        return acc
-    }, {})
+            awardGroups: getAwards(recipe),
+            SpecialAward: getSpecialAwards(recipe)
+        }))
+        .map(recipe => {
+            return {
+                ...recipe,
+                talent_lv0_yields: getYields(recipe, 0),
+                talent_lv1_yields: getYields(recipe, 1),
+                talent_lv2_yields: getYields(recipe, 2),
+                talent_lv3_yields: getYields(recipe, 3),
+            }
+        })
+        .reduce((acc, curr) => {
+            acc[curr.Id] = {
+                ...curr,
+                ...completeCommonData(curr),
+                ...getMaterials(curr)
+            }
+            return acc
+        }, {})
