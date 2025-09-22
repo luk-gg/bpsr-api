@@ -1,4 +1,5 @@
 import text_en from "$client/Lang/english.json";
+import CookMaterialTypeTable from "$client/Tables/CookMaterialTypeTable.json";
 import LifeCollectListTable from "$client/Tables/LifeCollectListTable.json";
 import LifeProductionListTable from "$client/Tables/LifeProductionListTable.json";
 import LifeFormulaTable from "$client/Tables/LifeFormulaTable.json"; // contains talents
@@ -168,8 +169,18 @@ export default
             NeedMaterial: curr.NeedMaterial
                 // Canned Fish has some materials that are [0, 0]; is this related to custom cooking? Filtering out for now
                 ?.filter(([itemId, amount]) => itemId > 0 && amount > 0)
-                // TODO: Fix items with NeedMaterialType 2 (use CookMaterialTypeTable); these are ingredient slots that can have multiple options
-                .map(arr => getBriefItemWithAmount(arr))
+                .map(([matId, amount]) => {
+                    switch (curr.NeedMaterialType) {
+                        case 1:
+                            return getBriefItemWithAmount([matId, amount])
+                        case 2:
+                            const material = CookMaterialTypeTable[matId]
+                            return { ...material, ...completeCommonData(material), amount }
+                        default:
+                            console.log("Unhandled NeedMaterialType", curr.NeedMaterialType, `(Recipe ${curr.Id})`)
+                    }
+                })
+
         }
         return acc
     }, {})
