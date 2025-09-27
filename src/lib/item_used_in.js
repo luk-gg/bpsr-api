@@ -22,7 +22,7 @@ export default Object.values(lifeSkillRecipes)
         if (!itemId && recipe.NeedMaterial?.length > 0) console.log("Recipe has no output item id but has required materials:", recipe.Id)
 
         if (itemId) {
-            for (const { Id: matId, amount } of recipe.NeedMaterial) {
+            for (const { Id: matId, amount } of recipe.materials) {
                 if (!matId) console.log("Missing material for recipe:", recipe.Id)
                 if (!acc[matId]) acc[matId] = housingRecipesByMatId[matId] ?? []
                 acc[matId].push(getBriefItemWithAmount([itemId, amount]))
