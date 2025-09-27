@@ -4,6 +4,7 @@ import { completeCommonData, getBriefData } from "./utils";
 import lifeSkillRecipes from "./life_skill_recipes";
 import LifeExpTable from "$client/Tables/LifeExpTable.json";
 import LifeFormulaTable from "$client/Tables/LifeFormulaTable.json"; // contains talents
+import quests from "./quests";
 
 const expTypes = {}
 
@@ -30,6 +31,19 @@ const talentsByProfessionId = Object.values(LifeFormulaTable)
         return acc
     }, {})
 
+// QuestType: 83
+const allWeeklyQuests = {
+    101: [30179],
+    102: [30185],
+    103: [30182],
+    201: [30177],
+    202: [30180],
+    203: [30183],
+    204: [30181],
+    205: [30184],
+    206: [30178],
+}
+
 export default
     Object.values(LifeProfessionTable)
         .map((profession) => {
@@ -37,6 +51,8 @@ export default
             const exp = expByProfessionId[profession.ProId]
             const expType = expTypes[profession.ProId]
             const talents = talentsByProfessionId[profession.ProId]
+            const weeklyQuests = allWeeklyQuests[profession.ProId]
+                .map(questId => quests.find(quest => quest.QuestId === questId))
 
             return {
                 ...profession,
@@ -44,7 +60,8 @@ export default
                 recipes,
                 exp,
                 expType,
-                talents
+                talents,
+                weeklyQuests
             }
         })
         .sort((a, b) =>

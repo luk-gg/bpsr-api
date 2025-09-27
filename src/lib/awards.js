@@ -8,7 +8,7 @@ import { getBriefItem } from "./utils";
 // RandomRule 3: give each, individual chances
 // RandomRule 4: give 1, weighted
 function getAwardDrops(award) {
-    if (award.ProItem.length) console.log(award.AwardID)
+    // Award 104 is the only one with ProItem and ProRule; it rewards Season 1 points and Luno..
     return award.GroupContent.map(([itemId, minAmount, maxAmount], contentIndex) => {
         let groupSize = 1;
         let weight = 1;
