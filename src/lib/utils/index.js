@@ -31,7 +31,7 @@ export function getBriefItemWithAmount(arr) {
 
 export function getAllText(entry) {
     return Object.keys(entry)
-        // Name, Des, Description, Description2, ShowPurview
+        // Name, Des, Description, Description2, ShowPurview, QuestName, QuestDetail, TitleName, PhaseName, TaskInfo
         .filter(key => key.endsWith("$english"))
         .reduce((acc, key) => {
             const originalKey = key.slice(0, key.indexOf("$"))
