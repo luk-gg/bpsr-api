@@ -1,10 +1,9 @@
 import EquipRefineTable from '$client/Tables/EquipRefineTable.json';
-import ItemTable from '$client/Tables/ItemTable.json';
 import ConditionTable from '$client/Tables/ConditionTable.json';
 import EquipPartTable from '$client/Tables/EquipPartTable.json';
 import FightAttrTable from '$client/Tables/FightAttrTable.json';
 import text_en from "$client/Lang/english.json";
-import { getBriefData } from './utils';
+import { getBriefItemWithAmount } from './utils';
 import { averageAttempts } from "../../util-functions/avgAttempts"
 
 // AttrAdd: attrNameStr
@@ -15,18 +14,35 @@ const attrNameMap = Object.values(FightAttrTable)
         return acc
     }, {})
 
+const equipRefineValues = Object.values(EquipRefineTable)
+
 // RefineId: [refineTableObj]
-const refinesMap = Object.values(EquipRefineTable)
-    .reduce((acc, curr) => {
+const refinesMap = equipRefineValues
+    .reduce((acc, curr, idx) => {
         if (!acc[curr.RefineId]) acc[curr.RefineId] = []
-        const RefineEffect = curr.RefineEffect.map(([_, attrId, amount]) => `${attrNameMap[attrId]} +${amount}`)
+        const prevLevel = idx > 0 && equipRefineValues[idx - 1].RefineId === curr.RefineId ? equipRefineValues[idx - 1] : null
+
+        // Ability score; cumulative, not per-level
+        const prevFightValue = prevLevel?.FightValue ?? 0
+        const FightValue = curr.FightValue - prevFightValue
+        
+        // Stat gain from refinement level; cumulative, not per-level
+        const RefineEffect = curr.RefineEffect.map(([_, attrId, amount], idx) => {
+            const [__, prevAttrId, prevAmount] = prevLevel?.RefineEffect[idx] ?? [null, null, 0]
+            return `${attrNameMap[attrId]} +${amount - prevAmount}`
+        })
+
+        // Bonus stat gain every 5 levels
         const RefineLevelEffect = curr.RefineLevelEffect.map(([_, attrId, amount]) => `${attrNameMap[attrId]} +${amount}`)
-        const RefineConsume = curr.RefineConsume.map(([itemId, amount]) => ({ ...getBriefData(ItemTable[itemId]), amount }))
+
+        const RefineConsume = curr.RefineConsume.map(([itemId, amount]) => getBriefItemWithAmount([itemId, amount]))
         const ShowCondition = curr.ShowCondition.map(([conditionId, val1]) => text_en[ConditionTable[conditionId].ShowPurview].replace("{*val*}", val1))
         const Condition = curr.Condition.map(([conditionId, val1]) => text_en[ConditionTable[conditionId].ShowPurview].replace("{*val*}", val1))
         const avgAttempts = averageAttempts(curr.SuccessRate / 10000, curr.FailCompensateRate / 10000)
+
         acc[curr.RefineId].push({
             ...curr,
+            FightValue,
             RefineEffect,
             RefineLevelEffect,
             RefineConsume,
