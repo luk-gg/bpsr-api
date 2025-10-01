@@ -145,11 +145,9 @@ function getSpecialAwards(recipe) {
     })
 }
 
-// Adds housing recipe ingredients from HousingItems.json (they don't use NeedMaterial and have extra keys)
-// Old Dock Wooden Crate (Item 11010155) (Recipe 2050307) (Function 102503) (HousingItem 11010155)
 function getMaterials(recipe) {
     const result = {}
-    let mats = recipe.NeedMaterial
+    let mats = recipe.NeedMaterial ?? []
 
     const furniture = recipe.RelatedItemId && HousingItems[recipe.RelatedItemId]
     if (furniture) {
@@ -165,12 +163,13 @@ function getMaterials(recipe) {
 
     result.materials = mats
         // Canned Fish has some materials that are [0, 0]; is this related to custom cooking? Filtering out for now
-        ?.filter(([itemId, amount]) => itemId > 0 && amount > 0)
+        .filter(([itemId, amount]) => itemId > 0 && amount > 0)
         .map(([matId, amount]) => {
             switch (recipe.NeedMaterialType) {
                 case 1:
                     return getBriefItemWithAmount([matId, amount])
-                // Recipes that allow multiple ingredients in a slot (i.e. any Lv.1 Fish)
+                // Variable materials (Fish Lv.1, etc.) have no sources, but they have options that could have sources
+                // TODO: add list of options that fill this slot
                 case 2:
                     const material = CookMaterialTypeTable[matId]
                     return { ...material, ...completeCommonData(material), amount }
