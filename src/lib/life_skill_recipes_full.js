@@ -2,6 +2,7 @@ import life_skill_recipes from "./life_skill_recipes";
 import item_sources from "./item_sources";
 
 // TODO: add back certain things like talent yields, required talents to obtain, etc.
+// TODO: make variable materials have a list of "options"
 // Sources are omitted because it makes the file go from 3 MB to fucking 498 MB.
 
 function appendLayer(mats, depth) {
