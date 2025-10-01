@@ -5,10 +5,18 @@ import item_sources from "./item_sources";
 // Sources are omitted because it makes the file go from 3 MB to fucking 498 MB.
 
 function appendLayer(mats, depth) {
-    return mats.map((mat, index) => ({ node: `d${depth}_${index}`, ...mat }))
+    return mats.map((mat, index) => {
+        const recipes = (item_sources[mat.Id] ?? []).map(source => source.lifeSkillSource?.Id).filter(id => id);
+
+        return {
+            node: `d${depth}_${index}`,
+            ...mat,
+            recipes
+        }
+    })
 }
 
-const recipesFull = Object.values(life_skill_recipes)
+const recipesWithMaterialTrees = Object.values(life_skill_recipes)
     // .filter(recipe => recipe.Id === 2020027)
     .map(recipe => {
 
@@ -19,7 +27,7 @@ const recipesFull = Object.values(life_skill_recipes)
         while (goNextDepth) {
             const prevMats = materials[depth - 1]
             const currentMats = prevMats
-            .flatMap(prevMat => {
+                .flatMap(prevMat => {
                     const prevMatSources = item_sources[prevMat.Id] ?? []
                     const recipes = prevMatSources.filter(source => source.lifeSkillSource).map(source => source.lifeSkillSource)
                     const mats = recipes.flatMap(recipe => recipe.materials)
@@ -32,6 +40,18 @@ const recipesFull = Object.values(life_skill_recipes)
         return {
             ...recipe,
             materials: materials.flat()
+        }
+    })
+
+// One more iteration to add usedIn
+const recipesFull = recipesWithMaterialTrees
+    .map(recipe => {
+        const usedIn = recipesWithMaterialTrees
+            .filter(rec => rec.materials.some(material => material.recipes.includes(recipe.Id)))
+
+        return {
+            ...recipe,
+            usedIn
         }
     })
 
