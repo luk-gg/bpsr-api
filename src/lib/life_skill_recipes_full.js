@@ -43,18 +43,6 @@ const recipesWithMaterialTrees = Object.values(life_skill_recipes)
         }
     })
 
-// One more iteration to add usedIn
-const recipesFull = recipesWithMaterialTrees
-    .map(recipe => {
-        const usedIn = recipesWithMaterialTrees
-            .filter(rec => rec.materials.some(material => material.recipes.includes(recipe.Id)))
-
-        return {
-            ...recipe,
-            usedIn
-        }
-    })
-
 export const entries_brief = []
 
-export default recipesFull
+export default recipesWithMaterialTrees
