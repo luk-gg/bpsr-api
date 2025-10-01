@@ -42,6 +42,7 @@ const recipesWithMaterialTrees = Object.values(life_skill_recipes)
             materials: materials.flat()
         }
     })
+    .filter(recipe => recipe.materials.length)
 
 export const entries_brief = []
 
