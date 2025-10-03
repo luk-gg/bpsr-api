@@ -145,7 +145,7 @@ function getSpecialAwards(recipe) {
     })
 }
 
-function getMaterials(recipe) {
+export function getMaterials(recipe) {
     const result = {}
     let mats = recipe.NeedMaterial ?? []
 

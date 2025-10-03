@@ -24,16 +24,16 @@ function appendLayer(mats, depth) {
 }
 
 const recipesWithMaterialTrees = Object.values(life_skill_recipes)
-    // .filter(recipe => recipe.Id === 2020027)
+    .filter(recipe => recipe.Id === 2020027)
     .map(recipe => {
         let goNextDepth = true;
         let depth = 1;
 
+        const d0 = [{ node: "0", ...getBriefItem(recipe.RelatedItemId), recipes: [recipe.Id] }]
+        const d1 = appendLayer(recipe.materials, depth).map(material => ({ parent: "0", edge: `0-${material.node}`, ...material }))
+
         // since there is only one parent, each node will have only one edge
-        const materials = [
-            [{ node: "0", ...getBriefItem(recipe.RelatedItemId), recipes: [recipe.Id] }],
-            appendLayer(recipe.materials, depth).map(material => ({ parent: "0", edge: `0-${material.node}`, ...material })),
-        ]
+        const materials = [d0, d1]
 
         while (goNextDepth) {
             const prevMats = materials[depth]
@@ -42,10 +42,13 @@ const recipesWithMaterialTrees = Object.values(life_skill_recipes)
                     const prevMatSources = item_sources[prevMat.Id] ?? []
                     const recipes = prevMatSources.filter(source => source.lifeSkillSource).map(source => source.lifeSkillSource)
                     const mats = recipes.flatMap(recipe => recipe.materials)
+                    console.log(recipes.map(recipe => recipe.Cost))
                     return mats.map(mat => ({ parent: prevMat.node, ...mat }))
                 })
-            materials.push(appendLayer(currentMats, ++depth)
-                .map(material => ({ edge: `${material.parent}-${material.node}`, ...material })))
+            materials.push(
+                appendLayer(currentMats, ++depth)
+                    .map(material => ({ edge: `${material.parent}-${material.node}`, ...material }))
+            )
             goNextDepth = currentMats.length > 0
         }
 
@@ -55,10 +58,10 @@ const recipesWithMaterialTrees = Object.values(life_skill_recipes)
         }
     })
     .filter(recipe => recipe.materials.length)
-    // .reduce((acc, curr) => {
-    //     acc[curr.Id] = curr.materials
-    //     return acc
-    // }, {})
+// .reduce((acc, curr) => {
+//     acc[curr.Id] = curr.materials
+//     return acc
+// }, {})
 
 export const entries_brief = []
 
