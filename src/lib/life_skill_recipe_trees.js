@@ -1,5 +1,7 @@
 import life_skill_recipes, { getMaterials } from "./life_skill_recipes";
 import { getBriefItem } from "./utils";
+import item_sources_life_skills from "./item_sources_life_skills"
+import { trimRecipe } from "./utils";
 
 // TODO: add back certain things like talent yields, required talents to obtain, etc.
 // TODO: make variable materials have a list of "options"
@@ -44,44 +46,6 @@ function addNodeData(materials, depth) {
     })
 }
 
-function trimRecipe(recipe) {
-    if (!recipe) return null
-
-    const {
-        Id,
-        RelatedItemId,
-        Cost,
-        Time,
-        NeedMaterial,
-        NeedMaterialType,
-        UnlockCondition,
-        LifeProId,
-        Exp,
-        SpecialAward,
-        talent_lv0_yields,
-        talent_lv1_yields,
-        talent_lv2_yields,
-        talent_lv3_yields
-    } = recipe
-
-    return {
-        Id,
-        RelatedItemId,
-        Cost,
-        Time,
-        NeedMaterial,
-        NeedMaterialType,
-        UnlockCondition,
-        LifeProId,
-        Exp,
-        SpecialAward,
-        talent_lv0_yields,
-        talent_lv1_yields,
-        talent_lv2_yields,
-        talent_lv3_yields
-    }
-}
-
 function getCraftingTreeForRecipe(rootRecipe) {
     let depth = 0;
 
@@ -96,7 +60,25 @@ function getCraftingTreeForRecipe(rootRecipe) {
         result.push(currDepth)
     }
 
-    return result.flat()
+    return result.flat().map(mat => {
+        if (mat.recipe) return mat
+
+        const lifeSkillSources = item_sources_life_skills[mat.Id]?.map(source => {
+            // these are bloating files, largest goes from 37kb to 3.12mb
+            delete source.talent_lv0_yields
+            delete source.talent_lv1_yields
+            delete source.talent_lv2_yields
+            delete source.talent_lv3_yields
+            delete source.Exp
+            delete source.SpecialAward
+            return source
+        })
+
+        return {
+            ...mat,
+            lifeSkillSources
+        }
+    })
 }
 
 const recipesWithMaterialTrees = Object.values(life_skill_recipes)

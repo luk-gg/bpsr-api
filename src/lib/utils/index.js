@@ -52,6 +52,44 @@ export function completeCommonData(entry) {
     }
 }
 
+export function trimRecipe(recipe) {
+    if (!recipe) return null
+
+    const {
+        Id,
+        RelatedItemId,
+        Cost,
+        Time,
+        NeedMaterial,
+        NeedMaterialType,
+        UnlockCondition,
+        LifeProId,
+        Exp,
+        SpecialAward,
+        talent_lv0_yields,
+        talent_lv1_yields,
+        talent_lv2_yields,
+        talent_lv3_yields
+    } = recipe
+
+    return {
+        Id,
+        RelatedItemId,
+        Cost,
+        Time,
+        NeedMaterial,
+        NeedMaterialType,
+        UnlockCondition,
+        LifeProId,
+        Exp,
+        SpecialAward,
+        talent_lv0_yields,
+        talent_lv1_yields,
+        talent_lv2_yields,
+        talent_lv3_yields
+    }
+}
+
 /** @param {number[][]} cost */
 export function formatItemCost(cost) {
     return cost.map(([itemId, amount]) => {
