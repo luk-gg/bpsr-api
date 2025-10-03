@@ -48,6 +48,7 @@ export function completeCommonData(entry) {
         Exp: getBriefItemWithAmount(entry.Exp),
         Cost: getBriefItemWithAmount(entry.Cost),
         UnlockCondition: getConditions(entry.UnlockCondition),
+        UnlockConditionZeroCost: getConditions(entry.UnlockConditionZeroCost),
         // ...getQuickJump(entry),
     }
 }
@@ -63,6 +64,7 @@ export function trimRecipe(recipe) {
         NeedMaterial,
         NeedMaterialType,
         UnlockCondition,
+        UnlockConditionZeroCost,
         LifeProId,
         Exp,
         SpecialAward,
@@ -80,6 +82,7 @@ export function trimRecipe(recipe) {
         NeedMaterial,
         NeedMaterialType,
         UnlockCondition,
+        UnlockConditionZeroCost,
         LifeProId,
         Exp,
         SpecialAward,
