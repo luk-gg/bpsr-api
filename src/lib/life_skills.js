@@ -11,8 +11,10 @@ const expTypes = {}
 const recipesByProfessionId = Object.values(lifeSkillRecipes)
     .reduce((acc, recipe) => {
         if (!acc[recipe.LifeProId]) acc[recipe.LifeProId] = []
-        expTypes[recipe.LifeProId] = { ...recipe.Exp, amount: undefined }
-        acc[recipe.LifeProId].push(getBriefData(recipe))
+        if (recipe.LifeProId < 200 || recipe.materials.length) {
+            expTypes[recipe.LifeProId] = { ...recipe.Exp, amount: undefined }
+            acc[recipe.LifeProId].push(getBriefData(recipe))
+        }
         return acc
     }, {})
 

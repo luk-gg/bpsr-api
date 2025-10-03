@@ -6,7 +6,7 @@ import LifeFormulaTable from "$client/Tables/LifeFormulaTable.json"; // contains
 import awardsMap from "./awards";
 import awardPackagesMap from "./award_packages";
 import testCases from "./tests/_test_sources_life_skill";
-import { completeCommonData, getBriefItemWithAmount } from "./utils";
+import { completeCommonData, getBriefItem, getBriefItemWithAmount } from "./utils";
 import HousingItems from "$client/Tables/HousingItems.json";
 
 // Logic must be revisited if they add more unique talents such as chance to not consume materials
@@ -191,11 +191,16 @@ export default
         ...Object.values(LifeProductionListTable)
     ]
         // Needed to get the correct format from the recipe tables
-        .map(recipe => ({
+        .map(recipe => {
+            const Icon = !recipe.Icon && recipe.RelatedItemId ? getBriefItem(recipe.RelatedItemId).Icon : recipe.Icon
+
+            return {
             ...recipe,
+            Icon,
             awardGroups: getAwards(recipe),
             SpecialAward: getSpecialAwards(recipe)
-        }))
+        }
+        })
         .map(recipe => {
             return {
                 ...recipe,
