@@ -63,6 +63,8 @@ function getCraftingTreeForRecipe(rootRecipe) {
     return result.flat().map(mat => {
         if (mat.recipe) return mat
 
+        // Ignoring LifeCollectListTable NeedLevel[] for now, as the first level (focused gathering) is always 0 or 1.
+        // [FocusedLv, RegularLv] where focused can use UnlockCondition and Cost, and RegularLv can use UnlockConditionZeroCost
         const lifeSkillSources = item_sources_life_skills[mat.Id]?.map(source => {
             // these are bloating files, largest goes from 37kb to 3.12mb
             delete source.talent_lv0_yields

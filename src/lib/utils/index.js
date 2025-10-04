@@ -59,6 +59,7 @@ export function trimRecipe(recipe) {
     const {
         Id,
         RelatedItemId,
+        Name,
         Cost,
         Time,
         NeedMaterial,
@@ -77,6 +78,7 @@ export function trimRecipe(recipe) {
     return {
         Id,
         RelatedItemId,
+        Name,
         Cost,
         Time,
         NeedMaterial,
