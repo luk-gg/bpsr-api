@@ -74,7 +74,10 @@ function getCraftingTreeForRecipe(rootRecipe) {
             delete recipe.Exp
             delete recipe.SpecialAward
 
-            const isFree = !!recipe.awardGroups.flat().find(item => item.itemId === mat.Id).isFree
+            if (!recipe.awardGroups.flat().find(item => item.itemId === mat.Id)) {
+                console.log("WARNING: item", mat.Id, mat.Name, "is not contained in its own awardGroups array")
+            }
+            const isFree = !!recipe.awardGroups.flat().find(item => item.itemId === mat.Id)?.isFree
             
             return {
                 ...trimRecipe(recipe),
@@ -90,7 +93,7 @@ function getCraftingTreeForRecipe(rootRecipe) {
 }
 
 const recipesWithMaterialTrees = Object.values(life_skill_recipes)
-    .filter(recipe => recipe.Id === 2020027)
+    // .filter(recipe => recipe.Id === 2020027)
     .reduce((acc, recipe) => {
         acc[recipe.Id] = getCraftingTreeForRecipe(recipe)
         return acc

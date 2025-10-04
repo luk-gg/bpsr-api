@@ -115,16 +115,13 @@ function getYields(recipe, talentLevel) {
 function getAwards(recipe) {
     // LifeProduction
     if (Array.isArray(recipe.Award)) {
-        return recipe.Award.map(awardId => awardsMap[awardId] ?? awardPackagesMap[awardId])
+        return recipe.Award.map(awardId => awardPackagesMap[awardId] ?? awardsMap[awardId])
     }
     // LifeCollect
     const freeAwardGroup = awardPackagesMap[recipe.FreeAward] ?? awardsMap[recipe.FreeAward]
     const result = [freeAwardGroup.map(award => ({ ...award, isFree: true }))]
     if (recipe.Award > 0) {
-        const awardGroup = awardsMap[recipe.Award] ?? awardPackagesMap[recipe.Award]
-        // Check to make sure our assumption is correct: that Award for LifeCollect will only result in one unique item id which we will use to link to ItemTable
-        const uniqItemIds = [...new Set(awardGroup.map(award => award.itemId))]
-        if (uniqItemIds.length > 1) console.log(`WARNING: Recipe ${recipe.Id} yields multiple items from Award ${recipe.Award}:`, uniqItemIds)
+        const awardGroup = awardPackagesMap[recipe.Award] ?? awardsMap[recipe.Award]
         result.push(awardGroup)
     }
     return result
