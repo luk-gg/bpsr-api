@@ -5,7 +5,7 @@ export default Object.entries(item_sources)
     .reduce((acc, [itemId, sources]) => {
         const lifeSkillSources = sources.filter(source => source.lifeSkillSource)
         if (lifeSkillSources.length) {
-            acc[itemId] = lifeSkillSources.map(source => trimRecipe(source.lifeSkillSource))
+            acc[itemId] = lifeSkillSources.map(source => source.lifeSkillSource)
         }
         return acc
     }, {})
