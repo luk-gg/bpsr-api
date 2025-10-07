@@ -55,7 +55,8 @@ function getSceneObjects(sceneId) {
             return {
                 ...obj.common,
                 name: Name,
-                icon: "/ui/atlas/map/map_icon_tp" // TEMP
+                // Pivot is the round teleporter while Transfer is the BPJP teleporter icon
+                icon: obj.data.SceneObjType === SceneObjType.Pivot ? "ui/atlas/map/map_pivot_on" : "ui/atlas/map/map_icon_tp"
             };
         });
 
@@ -63,9 +64,13 @@ function getSceneObjects(sceneId) {
         .filter(obj => obj.data.SceneObjType === SceneObjType.Resonance)
         .map(obj => {
             const { Name } = getAllText(EnvironmentResonanceTable[obj.data.Id]);
+            let icon;
+            if (obj.data.Id === 50102) icon = "ui/atlas/map/map_icon_phantom" // wind core
+            if (obj.data.Id === 50101) icon =  "ui/atlas/map/map_icon_hero_grass" // hero's herb
             return {
                 ...obj.common,
-                name: Name
+                name: Name,
+                icon
             };
         });
 

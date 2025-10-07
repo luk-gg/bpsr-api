@@ -13,7 +13,6 @@ export default scenes.reduce((acc, scene) => {
         allMarkers.forEach(([markerType, markers]) => {
             markers.forEach(marker => {
                 if (!acc[marker.name]) acc[marker.name] = []
-                console.log(marker)
 
                 // Group duplicates while keeping track of how many times a marker appears in a map across ALL scenes
                 const existingMarkerIndex = acc[marker.name].indexOf(acc[marker.name].find(marker => marker.mapId === scene.mapId))
