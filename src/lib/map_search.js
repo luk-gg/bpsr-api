@@ -3,10 +3,10 @@ import { scenes } from "./maps";
 export default scenes.reduce((acc, scene) => {
     if (scene.name) {
         acc[scene.name] = [{
-            name: scene.name,
             type: "Instance",
             mapId: scene.mapId,
             sceneId: scene.id,
+            sceneName: scene.name
         }]
 
         const allMarkers = Object.entries(scene.markerLayers)
@@ -23,12 +23,13 @@ export default scenes.reduce((acc, scene) => {
                 }
                 else {
                     acc[marker.name].push({
-                        name: marker.name,
+                        markerName: marker.name,
                         type: markerType,
                         mapId: scene.mapId,
                         sceneId: scene.id,
                         count: 1,
-                        icon: marker.icon
+                        icon: marker.icon,
+                        sceneName: scene.name
                     })
                 }
             })
