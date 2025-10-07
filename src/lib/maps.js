@@ -1,5 +1,5 @@
 ﻿import SceneTable from "$client/Tables/SceneTable.json";
-import {completeCommonData, getAllText, getBriefArr} from "./utils/index.js";
+import { completeCommonData, getAllText, getBriefArr } from "./utils/index.js";
 import SceneObjectTable from "$client/Tables/SceneObjectTable.json";
 import TransferTable from "$client/Tables/TransferTable.json";
 import EnvironmentResonanceTable from "$client/Tables/EnvironmentResonanceTable.json";
@@ -33,8 +33,8 @@ const ItemType = {
     ReadingMaterial: 110
 };
 
-const entries = Object.values(SceneTable).map(scene => {
-    const sceneObjects = Object.values(SceneObjectEntityTable[scene.Id] || {})
+function getSceneObjects(sceneId) {
+    const sceneObjects = Object.values(SceneObjectEntityTable[sceneId] || {})
         .filter(obj => SceneObjectTable[obj.Id])  // filter invalid references 
         .map(obj => {
             return {
@@ -45,30 +45,7 @@ const entries = Object.values(SceneTable).map(scene => {
                 data: SceneObjectTable[obj.Id]
             };
         });
-    const collectables = Object.values(CollectionEntityTable[scene.Id] || {})
-        .filter(obj => CollectionTable[obj.Id])  // filter invalid references 
-        .map(obj => {
-            return {
-                common: {
-                    position: obj.Position,
-                },
-                instance: obj,
-                data: CollectionTable[obj.Id]
-            };
-        });
-    const npcs = Object.values(NpcEntityTable[scene.Id] || {})
-        .filter(obj => NpcTable[obj.Id])  // filter invalid references 
-        .map(obj => {
-            return {
-                common: {
-                    position: obj.Position,
-                },
-                instance: obj,
-                data: NpcTable[obj.Id],
-                tagData: SceneTagTable[NpcTable[obj.Id].SceneTagId]
-            };
-        });
-    
+
     const teleportPoints = sceneObjects
         .filter(obj => obj.data.SceneObjType === SceneObjType.Pivot || obj.data.SceneObjType === SceneObjType.Transfer)
         .map(obj => {
@@ -89,6 +66,25 @@ const entries = Object.values(SceneTable).map(scene => {
             };
         });
 
+    return {
+        teleportPoints,
+        resonancePoints
+    }
+}
+
+function getCollectables(sceneId) {
+    const collectables = Object.values(CollectionEntityTable[sceneId] || {})
+        .filter(obj => CollectionTable[obj.Id])  // filter invalid references 
+        .map(obj => {
+            return {
+                common: {
+                    position: obj.Position,
+                },
+                instance: obj,
+                data: CollectionTable[obj.Id]
+            };
+        });
+
     const classifyCollectable = (obj) => {
         if (obj.data.Id === 52001)
             return "commonChest";
@@ -104,9 +100,11 @@ const entries = Object.values(SceneTable).map(scene => {
         }
         return null;
     };
+
     const classifiedCollectables = collectables
         .filter(obj => obj.instance.RefreshMode === 0 /* EBase */)
-        .map(x => ({...x, cls: classifyCollectable(x)}));
+        .map(x => ({ ...x, cls: classifyCollectable(x) }));
+
     const chests = classifiedCollectables
         .filter(obj => obj.cls === "commonChest" || obj.cls === "exquisiteChest" || obj.cls === "luxuriousChest")
         .map(obj => {
@@ -115,6 +113,7 @@ const entries = Object.values(SceneTable).map(scene => {
                 type: obj.cls
             };
         });
+
     const readingMaterials = classifiedCollectables
         .filter(obj => obj.cls === "readingMaterial")
         .map(obj => {
@@ -125,8 +124,28 @@ const entries = Object.values(SceneTable).map(scene => {
             };
         });
 
+    return {
+        chests,
+        readingMaterials
+    }
+}
+
+function getNpcs(sceneId) {
+    const npcs = Object.values(NpcEntityTable[sceneId] || {})
+        .filter(obj => NpcTable[obj.Id])  // filter invalid references 
+        .map(obj => {
+            return {
+                common: {
+                    position: obj.Position,
+                },
+                instance: obj,
+                data: NpcTable[obj.Id],
+                tagData: SceneTagTable[NpcTable[obj.Id].SceneTagId]
+            };
+        });
+
     const showNpcs = npcs
-        .filter(obj => obj.tagData && DailyWorldEventTable[obj.id]?.Scene !== scene.Id)
+        .filter(obj => obj.tagData && DailyWorldEventTable[obj.id]?.Scene !== sceneId)
         .map(obj => {
             const { Name } = getAllText(obj.tagData);
             return {
@@ -136,15 +155,21 @@ const entries = Object.values(SceneTable).map(scene => {
             };
         });
 
-    const {Name} = completeCommonData(scene);
+    return {
+        npcs: showNpcs
+    }
+}
+
+const entries = Object.values(SceneTable).map(scene => {
+    const { Name } = completeCommonData(scene);
     return {
         id: scene.Id,
         name: Name,
-        teleportPoints,
-        resonancePoints,
-        chests,
-        readingMaterials,
-        npcs: showNpcs,
+        markerLayers: {
+            ...getSceneObjects(scene.Id),
+            ...getCollectables(scene.Id),
+            ...getNpcs(scene.Id),
+        }
     };
 })
 
