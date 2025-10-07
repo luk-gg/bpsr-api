@@ -3,6 +3,7 @@ import { scenes } from "./maps";
 export default scenes.reduce((acc, scene) => {
     if (scene.name) {
         acc[scene.name] = [{
+            name: scene.name,
             type: "Instance",
             mapId: scene.mapId,
             sceneId: scene.id,
@@ -22,6 +23,7 @@ export default scenes.reduce((acc, scene) => {
                 }
                 else {
                     acc[marker.name].push({
+                        name: marker.name,
                         type: markerType,
                         mapId: scene.mapId,
                         sceneId: scene.id,

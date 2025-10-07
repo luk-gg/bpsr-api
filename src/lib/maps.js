@@ -197,7 +197,7 @@ const entries = scenes.reduce((acc, scene) => {
         acc[mapId] = {
             id: mapId,
             name, // not entirely accurate but it is what it is
-            mapImage: `/ui/textures/scenemaps/${mapId}/${mapId}_${mapId}`,
+            mapImage: `ui/textures/scenemaps/${mapId}/${mapId}_${mapId}`,
             scenes: []
         }
     }

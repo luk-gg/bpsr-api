@@ -1,1 +1,1 @@
-{"id":"scene_login","mapImage":"/ui/textures/scenemaps/scene_login/scene_login_scene_login","scenes":[{"id":1,"mapId":"scene_login","markerLayers":{"teleportPoints":[],"resonancePoints":[],"commonChests":[],"exquisiteChests":[],"luxuriousChests":[],"readingMaterials":[],"npcs":[]}}]}
+{"id":"scene_login","mapImage":"ui/textures/scenemaps/scene_login/scene_login_scene_login","scenes":[{"id":1,"mapId":"scene_login","markerLayers":{"teleportPoints":[],"resonancePoints":[],"commonChests":[],"exquisiteChests":[],"luxuriousChests":[],"readingMaterials":[],"npcs":[]}}]}
