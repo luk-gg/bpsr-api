@@ -1,1 +1,1 @@
-{"id":"dng_worldboss_001","name":"World Dominator","sceneNames":["World Dominator"],"markerNames":[]}
+{"id":"dng_worldboss_001","name":"World Dominator","mapImage":"/ui/textures/scenemaps/dng_worldboss_001/dng_worldboss_001_dng_worldboss_001","scenes":[{"id":7150,"name":"World Dominator","mapId":"dng_worldboss_001","markerLayers":{"teleportPoints":[],"resonancePoints":[],"commonChests":[],"exquisiteChests":[],"luxuriousChests":[],"readingMaterials":[],"npcs":[]}}]}
