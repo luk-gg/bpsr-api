@@ -1,6 +1,7 @@
 ﻿import SceneTable from "$client/Tables/SceneTable.json";
 import { completeCommonData, getAllText, getBriefArr } from "./utils/index.js";
 import SceneObjectTable from "$client/Tables/SceneObjectTable.json";
+import SceneResourceTable from "$client/Tables/SceneResourceTable.json";
 import TransferTable from "$client/Tables/TransferTable.json";
 import EnvironmentResonanceTable from "$client/Tables/EnvironmentResonanceTable.json";
 import DailyWorldEventTable from "$client/Tables/DailyWorldEventTable.json";
@@ -29,6 +30,7 @@ const SceneObjType = {
     Resonance: 3,
     Transfer: 4
 };
+
 const ItemType = {
     ReadingMaterial: 110
 };
@@ -52,7 +54,8 @@ function getSceneObjects(sceneId) {
             const { Name } = getAllText(TransferTable[obj.data.Id]);
             return {
                 ...obj.common,
-                name: Name
+                name: Name,
+                icon: "/ui/atlas/map/map_icon_tp" // TEMP
             };
         });
 
@@ -105,14 +108,19 @@ function getCollectables(sceneId) {
         .filter(obj => obj.instance.RefreshMode === 0 /* EBase */)
         .map(x => ({ ...x, cls: classifyCollectable(x) }));
 
-    const chests = classifiedCollectables
-        .filter(obj => obj.cls === "commonChest" || obj.cls === "exquisiteChest" || obj.cls === "luxuriousChest")
-        .map(obj => {
-            return {
-                ...obj.common,
-                type: obj.cls
-            };
-        });
+    function getChests(chestType) {
+        return classifiedCollectables
+            .filter(obj => obj.cls === chestType)
+            .map(obj => {
+                const { CollectionName } = getAllText(obj.data);
+                return {
+                    ...obj.common,
+                    name: CollectionName,
+                    awardId: obj.data.AwardId,
+                    icon: "cook_item_mushroom" // TEMP
+                };
+            });
+    }
 
     const readingMaterials = classifiedCollectables
         .filter(obj => obj.cls === "readingMaterial")
@@ -125,7 +133,9 @@ function getCollectables(sceneId) {
         });
 
     return {
-        chests,
+        commonChests: getChests("commonChest"),
+        exquisiteChests: getChests("exquisiteChest"),
+        luxuriousChests: getChests("luxuriousChest"),
         readingMaterials
     }
 }
@@ -160,11 +170,14 @@ function getNpcs(sceneId) {
     }
 }
 
-const entries = Object.values(SceneTable).map(scene => {
+export const scenes = Object.values(SceneTable).map(scene => {
     const { Name } = completeCommonData(scene);
+    const mapId = SceneResourceTable[scene.SceneResourceId].SceneFile.slice(7)
+
     return {
         id: scene.Id,
         name: Name,
+        mapId,
         markerLayers: {
             ...getSceneObjects(scene.Id),
             ...getCollectables(scene.Id),
@@ -173,5 +186,34 @@ const entries = Object.values(SceneTable).map(scene => {
     };
 })
 
-export const entries_brief = getBriefArr(entries)
+const entries = scenes.reduce((acc, scene) => {
+    const { mapId, name } = scene
+    if (!acc[mapId]) {
+        acc[mapId] = {
+            id: mapId,
+            name, // not entirely accurate but it is what it is
+            mapImage: `/ui/textures/scenemaps/${mapId}/${mapId}_${mapId}`,
+            scenes: []
+        }
+    }
+    acc[mapId].scenes.push(scene)
+    return acc
+}, {})
+
+export const entries_brief = Object.values(entries).map(map => {
+    const sceneNames = map.scenes.map(scene => scene.name)
+    const markerNames = map.scenes.flatMap(scene => {
+        const markers = Object.values(scene.markerLayers).flat()
+        const names = markers.map(marker => marker.name)
+        return [...new Set(names)]
+    })
+
+    return {
+        id: map.id,
+        name: map.name,
+        sceneNames,
+        markerNames
+    }
+})
+
 export default entries
