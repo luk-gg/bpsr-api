@@ -52,11 +52,22 @@ function getSceneObjects(sceneId) {
         .filter(obj => obj.data.SceneObjType === SceneObjType.Pivot || obj.data.SceneObjType === SceneObjType.Transfer)
         .map(obj => {
             const { Name } = getAllText(TransferTable[obj.data.Id]);
+            let icon, type;
+            switch (obj.data.SceneObjType) {
+                case SceneObjType.Pivot:
+                    type = "engramHub"
+                    icon = "ui/atlas/map/map_pivot_on"
+                    break
+                case SceneObjType.Transfer:
+                    type = "teleportationDevice"
+                    icon = "ui/atlas/map/map_icon_tp"
+                    break
+            }
             return {
                 ...obj.common,
                 name: Name,
-                // Pivot is the round teleporter while Transfer is the BPJP teleporter icon
-                icon: obj.data.SceneObjType === SceneObjType.Pivot ? "ui/atlas/map/map_pivot_on" : "ui/atlas/map/map_icon_tp"
+                type,
+                icon
             };
         });
 
@@ -64,12 +75,23 @@ function getSceneObjects(sceneId) {
         .filter(obj => obj.data.SceneObjType === SceneObjType.Resonance)
         .map(obj => {
             const { Name } = getAllText(EnvironmentResonanceTable[obj.data.Id]);
-            let icon;
-            if (obj.data.Id === 50102) icon = "ui/atlas/map/map_icon_phantom" // wind core
-            if (obj.data.Id === 50101) icon =  "ui/atlas/map/map_icon_hero_grass" // hero's herb
+            let icon, type;
+            switch (obj.data.Id) {
+                // Hero's Herb
+                case 50101:
+                    type = "herosHerb"
+                    icon = "ui/atlas/map/map_icon_hero_grass";
+                    break
+                // Wind Core
+                case 50102:
+                    type = "windCore"
+                    icon = "ui/atlas/map/map_icon_phantom"
+                    break
+            }
             return {
                 ...obj.common,
                 name: Name,
+                type,
                 icon
             };
         });
@@ -121,6 +143,7 @@ function getCollectables(sceneId) {
                 return {
                     ...obj.common,
                     name: CollectionName,
+                    type: obj.cls,
                     awardId: obj.data.AwardId,
                     icon: "cook_item_mushroom" // TEMP
                 };
@@ -133,14 +156,13 @@ function getCollectables(sceneId) {
             const { CollectionName } = getAllText(obj.data);
             return {
                 ...obj.common,
-                name: CollectionName
+                name: CollectionName,
+                type: obj.cls,
             };
         });
 
     return {
-        commonChests: getChests("commonChest"),
-        exquisiteChests: getChests("exquisiteChest"),
-        luxuriousChests: getChests("luxuriousChest"),
+        chests: [...getChests("commonChest"), ...getChests("exquisiteChest"), ...getChests("luxuriousChest")],
         readingMaterials
     }
 }
@@ -166,6 +188,7 @@ function getNpcs(sceneId) {
             return {
                 ...obj.common,
                 name: Name,
+                type: Name,
                 icon: obj.tagData.Icon1
             };
         });
