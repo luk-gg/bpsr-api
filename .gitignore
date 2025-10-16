@@ -26,6 +26,7 @@ git-filter-repo
 # !/json/**/ranking_*
 
 /scripts/extract*
+/scripts/bpsr*
 
 # Ignore game files except for UI
 /game/*/**

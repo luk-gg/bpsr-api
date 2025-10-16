@@ -157,7 +157,7 @@ function getCollectables(sceneId) {
             return {
                 ...obj.common,
                 name: CollectionName,
-                type: obj.cls,
+                type: CollectionName,
             };
         });
 
