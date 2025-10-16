@@ -40,9 +40,8 @@ const craftingRecipesWithVariants = uniqItemRecipes.map((recipe) => {
 })
 
 function crawlMaterial(mat) {
-    const item = items.find(i => i.Id === mat.Id && i.Type !== 3) ?? mat // TODO: Handle fish
-    
-    // "Fish Lv.3" etc. have no sources
+    const item = items.find(i => i.Id === mat.Id && i.Type !== 3) ?? mat
+
     const sources = item.sources?.map(source => {
         const { lifeSkillSource } = source
         if (!lifeSkillSource) return source
@@ -64,12 +63,14 @@ function crawlMaterial(mat) {
                 materials
             }
         }
-
     })
+
+    const options = item.options?.map(option => crawlMaterial(option))
 
     return {
         ...item,
-        sources
+        sources,
+        options
     }
 }
 
