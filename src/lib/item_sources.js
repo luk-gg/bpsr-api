@@ -66,7 +66,7 @@ export default Object.values(ObtainWayTable)
                     case 102503: // Furniture Crafting
                         // Some furniture have multiple recipes but they require the same materials
                         const allRecipes = Object.values(lifeSkillSources).filter(rec => rec.FurnitureId === item.Id);
-                        const uniqRecipes = uniqBy(allRecipes, (recipe) => recipe.materials.map(mat => mat.Name + mat.amount).join(""))
+                        const uniqRecipes = uniqBy(allRecipes, (recipe) => recipe.materials.map(mat => mat.Id + mat.amount).join(""))
 
                         if (uniqRecipes.length > 1) {
                             console.log("WARNING: Furniture item", item.Id, "has multiple recipes for the same source!")

@@ -1,4 +1,5 @@
 import text_en from "$client/Lang/english.json";
+import CookMaterialTable from "$client/Tables/CookMaterialTable.json";
 import CookMaterialTypeTable from "$client/Tables/CookMaterialTypeTable.json";
 import LifeCollectListTable from "$client/Tables/LifeCollectListTable.json";
 import LifeProductionListTable from "$client/Tables/LifeProductionListTable.json";
@@ -165,16 +166,22 @@ export function getMaterials(recipe) {
             switch (recipe.NeedMaterialType) {
                 case 1:
                     return getBriefItemWithAmount([matId, amount])
+                    
                 // Variable materials (Fish Lv.1, etc.) have no sources, but they have options that could have sources
-                // TODO: add list of options that fill this slot
                 case 2:
                     const material = CookMaterialTypeTable[matId]
-                    return { ...material, ...completeCommonData(material), amount }
+                    const options = Object.values(CookMaterialTable)
+                        .filter(cookable => cookable.TypeB === material.Id)
+                        .map(cookable => getBriefItemWithAmount([cookable.Id, amount]))
+                    return { ...material, ...completeCommonData(material), amount, options }
                 default:
                     console.log("Unhandled NeedMaterialType", recipe.NeedMaterialType, `(Recipe ${recipe.Id})`)
             }
         })
-
+        // .map((mat) => {
+        //     if (!mat.TagColor)
+        // })
+    
     return result
 }
 
