@@ -1,18 +1,20 @@
 import ObtainWayTable from "$client/Tables/ObtainWayTable.json"
 import FunctionTable from "$client/Tables/FunctionTable.json"
+import StallDetailTable from "$client/Tables/StallDetailTable.json"
 import lifeSkillSources from "./life_skill_recipes";
 import { getAllText } from "./utils";
+import uniqBy from "lodash/uniqBy";
 
 // Currently uses the in-game list of ways to obtain items. May benefit from doing a manual pass through all possible ways to obtain items to catch any missing sources.
 
 // Check for any GetWays ids that don't exist in Function Table
-// const uniqWays = new Set(Object.values(ObtainWayTable).flatMap(item => {
-//     return item.GetWays.map(way => way[0])
-// }))
+const uniqWays = new Set(Object.values(ObtainWayTable).flatMap(item => {
+    return item.GetWays.map(way => way[0])
+}))
 // console.log([...uniqWays])
-// for (const id of [...uniqWays]) {
-//     if (!FunctionTable[id]) console.log(id)
-// }
+for (const id of [...uniqWays]) {
+    if (!FunctionTable[id]) console.log(id)
+}
 
 const functionsWithParams = []
 
@@ -58,6 +60,23 @@ export default Object.values(ObtainWayTable)
                     // case 800854: // Weapon
                     // case 800831: // Box
                     // case 800841: // Box
+                    case 800400: // Trading Center
+                        details.tradingInfo = StallDetailTable[item.Id]
+                        break;
+                    case 102503: // Furniture Crafting
+                        // Some furniture have multiple recipes but they require the same materials
+                        const allRecipes = Object.values(lifeSkillSources).filter(rec => rec.FurnitureId === item.Id);
+                        const uniqRecipes = uniqBy(allRecipes, (recipe) => recipe.materials.map(mat => mat.Name + mat.amount).join(""))
+
+                        if (uniqRecipes.length > 1) {
+                            console.log("WARNING: Furniture item", item.Id, "has multiple recipes for the same source!")
+                            details.lifeSkillSources = uniqRecipes
+                        }
+                        else {
+                            details.lifeSkillSource = uniqRecipes[0]
+                        }
+
+                        break;
                 }
                 // if (functionId === 501004 && functionParam === 2010060) console.log(details)
                 return {

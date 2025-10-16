@@ -17,6 +17,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"convolution": "^1.0.1"
+		"convolution": "^1.0.1",
+		"lodash": "^4.17.21"
 	}
 }
