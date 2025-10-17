@@ -9,6 +9,7 @@ import uniqBy from "lodash/uniqBy";
 // Nautical Anchor Rug has duplicate recipes, should only show 1: http://localhost:5173/life_skill_recipe_trees2?RelatedItemId=11010074
 // Mystery Metal has no materials itself but has 3 variants: http://localhost:5173/life_skill_recipe_trees2?Name=Mystery%20Metal
 // Astelpot Feast is a recipe with 3 outputs (see awardGroups): http://localhost:5173/life_skill_recipe_trees2?RelatedItemId=1012053
+// Fish Meat - Novice has a variable material (Fish Lv. 1): http://localhost:5173/life_skill_recipe_trees2?RelatedItemId=1082111
 
 // In-game these are unique by ITEM ID but the life skill menu shows RECIPE NAME.
 // i.e. Culinary Focused has Astelpot Feast, but clicking on the item brings up the tooltip for item Astelpot Feast Lv. 2. Lv 1 and 3 are not listed.
@@ -40,21 +41,14 @@ const craftingRecipesWithVariants = uniqItemRecipes.map((recipe) => {
 })
 
 function crawlMaterial(mat) {
+    // TODO: Handle Season Pass EXP and Fish Lv. 2 both having item id 302...
     const item = items.find(i => i.Id === mat.Id && i.Type !== 3) ?? mat
 
     const sources = item.sources?.map(source => {
         const { lifeSkillSource } = source
         if (!lifeSkillSource) return source
 
-        const materials = lifeSkillSource.materials.map(mat => {
-            // TODO: Handle Season Pass EXP and Fish Lv. 2 both having item id 302...
-            const matDetails = items.find(item => item.Id === mat.Id && item.Type !== 3)
-            if (matDetails) {
-                return crawlMaterial({ ...matDetails, usedIn: undefined })
-            }
-
-            return mat
-        })
+        const materials = lifeSkillSource.materials.map(mat => crawlMaterial(mat))
 
         return {
             ...source,
@@ -70,7 +64,8 @@ function crawlMaterial(mat) {
     return {
         ...item,
         sources,
-        options
+        options,
+        usedIn: undefined
     }
 }
 
